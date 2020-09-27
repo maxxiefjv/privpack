@@ -1,0 +1,5 @@
+include LICENSE
+recursive-include docs *.bat
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
