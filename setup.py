@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="privpack-maxxiefjv", # Replace with your own username
+    name="privpack-maxxiefjv",
     version="0.0.2",
     author="Max Vasterd",
     author_email="vasterd97@gmail.com",
