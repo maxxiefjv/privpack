@@ -23,5 +23,11 @@ setuptools.setup(
         'torch',
         'numpy',
         'scipy'
-    ]
+    ],
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-cov'
+        ]
+    }
 )
