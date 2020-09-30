@@ -11,7 +11,7 @@ setuptools.setup(
     description="A small package providing the tools to learn a GAN to preserve privacy.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/maxxiefjv/PrivacyPreservingGANs",
+    url="https://github.com/maxxiefjv/Privpack",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
