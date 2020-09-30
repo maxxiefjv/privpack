@@ -9,13 +9,16 @@ import pytest
 def lambda_and_delta():
     return (1, 0)
 
+
 @pytest.fixture
 def epochs():
     return 1
 
+
 @pytest.fixture
 def batch_size():
     return 1
+
 
 @pytest.fixture
 def uncorrelated_train_and_test_data():
@@ -33,6 +36,7 @@ def mock_release_probabilities():
         [0.3],
         [0.1]
     ])
+
 
 def create_privatizer_criterion(lambd, delta_constraint):
     def privatizer_criterion(release_probabilities, likelihood_x, actual_public):
@@ -57,7 +61,7 @@ def test_binary_mi_gan_x_likelihoods(lambda_and_delta, batch_size, uncorrelated_
     privatizer_criterion = create_privatizer_criterion(lambd, delta_constraint)
 
     binary_gan = BinaryGAN(torch.device('cpu'), privatizer_criterion, adversary_criterion)
-    mock_x_likelihoods = binary_gan._get_likelihoods(train_data[:batch_size,0])
+    mock_x_likelihoods = binary_gan._get_likelihoods(train_data[:batch_size, 0])
     assert mock_x_likelihoods.size() == torch.Size([batch_size, 2])
 
 
@@ -65,6 +69,6 @@ def test_binary_mi_gan(epochs, lambda_and_delta, uncorrelated_train_and_test_dat
     (lambd, delta_constraint) = lambda_and_delta
     (train_data, test_data) = uncorrelated_train_and_test_data
     privatizer_criterion = create_privatizer_criterion(lambd, delta_constraint)
-    
+
     binary_gan = BinaryGAN(torch.device('cpu'), privatizer_criterion, adversary_criterion)
     binary_gan.train(train_data, test_data, epochs)
