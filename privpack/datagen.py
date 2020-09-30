@@ -68,3 +68,20 @@ def generate_gauss_mixture_data(mu, cov):
     gm_test_data = torch.Tensor(mixture_data[8000:])
 
     return (gm_train_data, gm_test_data)
+
+def get_ppan_distribution_params(x_dim, y_dim):
+    print("Running ppan distribution params for data generation")
+    correlation_coefficients = torch.Tensor([0.47, 0.24, 0.85, 0.07, 0.66])
+    cov_top = torch.cat(
+        (torch.eye(x_dim), torch.diag(correlation_coefficients)), dim=1)
+    cov_bot = torch.cat(
+        (torch.diag(correlation_coefficients), torch.eye(x_dim)), dim=1)
+    cov = torch.cat((cov_top, cov_bot))
+    mu = torch.zeros(x_dim + y_dim)
+    return (mu, cov)
+
+def get_completely_uncorrelated_distribution_params(x_dim, y_dim):
+    print("Running distribution params with completely independent data")
+    cov = torch.eye(x_dim + y_dim)
+    mu = torch.zeros(x_dim + y_dim)
+    return (mu, cov)

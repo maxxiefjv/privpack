@@ -1,10 +1,11 @@
 import math
 import torch
+import numpy as np
 
-def compute_released_data_statistics(released_data, data, statistics):
+def compute_released_data_statistics(released_data, data, statistics, private_size=None):
     statistics_report = {}
     for statistic in statistics:
-        data_stats = statistic(released_data, data)
+        data_stats = statistic(released_data.detach(), data, private_size)
         statistics_report[statistic.__name__] = data_stats
 
     return statistics_report
@@ -20,23 +21,18 @@ def get_likelihood_xi_given_z(adversary_out, Xi):
 
     return res  # P(x | z)
 
-def compute_binary_released_set(privatizer, data):
-    released_data = privatizer(data).detach()
-    random_uniform_tensor = torch.rand(released_data.size())
-    return torch.ceil(released_data - random_uniform_tensor).to(torch.int).view(-1, 1)
-
-def binary_bivariate_mutual_information_statistic(released_data, data):
+def binary_bivariate_mutual_information_statistic(released_data, data, private_size):
     full_data_tensor = torch.cat((released_data.view(-1, 1), data.view(-1, 1)), dim=1)
     full_data_distribution = estimate_binary_distribution(full_data_tensor)
     return compute_mutual_information_binary(full_data_distribution)
 
-def binary_bivariate_mutual_information_zx(released_data, data):
+def binary_bivariate_mutual_information_zx(released_data, data, private_size):
     return binary_bivariate_mutual_information_statistic(released_data, data[:, 0])
 
-def binary_bivariate_mutual_information_zy(released_data, data):
+def binary_bivariate_mutual_information_zy(released_data, data, private_size):
     return binary_bivariate_mutual_information_statistic(released_data, data[:, 1])
 
-def binary_bivariate_distortion_zy(released_data, data):
+def binary_bivariate_distortion_zy(released_data, data, private_size):
     return hamming_distance(released_data, data[:, 1].view(-1, 1)).to(torch.float64).mean().item()
 
 def hamming_distance(actual, expected):
@@ -68,21 +64,56 @@ def estimate_binary_distribution(data):
     ])
 
 # (Multivariate) Gaussian related Utility functions
-def compute_mutual_information_gaussian(full_cov_table, x_size):
-    full_cov_table = torch.Tensor(full_cov_table)
-    schur_complement = _compute_schur_complement(full_cov_table, x_size)
-    x_cov = full_cov_table[:x_size, :x_size]
-    if (torch.det(x_cov) == 0):
+def sampled_data_from_network(privatizer, entry, k):
+    sampled_data = torch.Tensor([])
+    entry = entry.to(torch.float)
+    for j in range(k):
+        privatized_sample = privatizer(entry)
+        privatized_sample = privatized_sample.unsqueeze(0)
+        sampled_data = torch.cat((sampled_data, privatized_sample), 0)
+
+    return sampled_data
+
+def compute_mutual_information_gaussian_zx(released_data, data, private_size):
+    return compute_mutual_information_gaussian_statistic(released_data, data[:, :private_size])
+
+def compute_mutual_information_gaussian_zy(released_data, data, private_size):
+    return compute_mutual_information_gaussian_statistic(released_data, data[:, private_size:])
+
+def compute_mse_distortion_zy(released_data, data, private_size):
+    return elementwise_mse(released_data, data[:, private_size:]).mean().item()
+
+def elementwise_mse(released, expected):
+    return torch.square(torch.norm(expected - released, p=None, dim=1))
+
+def compute_mutual_information_gaussian_statistic(released_data, data):
+    numpy_release = released_data.cpu().numpy()
+    numpy_data = data.cpu().numpy()
+    return compute_mutual_information_gaussian(np.cov(numpy_data.T, numpy_release.T), released_data.size(1))
+
+def compute_mutual_information_gaussian(full_cov_table, released_data_size):
+    # TODO: What...torch.square? schur_complement should be invertible.
+    full_cov_table = torch.square(torch.Tensor(full_cov_table))
+    schur_complement = _compute_schur_complement(full_cov_table, released_data_size)
+    x_cov = full_cov_table[:released_data_size, :released_data_size]
+
+    if (torch.det(x_cov) <= 0):
         print('determinent x_cov is zero.')
-    if (torch.det(schur_complement) == 0):
-        print('determinent schur_complement is zero.')
+    if (torch.det(schur_complement) <= 0):
+        print('determinent schur_complement is smaller than 0.')
 
-    return .5 * torch.log((torch.det(x_cov) / torch.det(schur_complement)))
+    if (torch.isnan(torch.det(x_cov))):
+        print('determinent x_cov is NaN.')
+    if (torch.isnan(torch.det(schur_complement))):
+        print('determinent schur_complement is NaN.')
 
-def _compute_schur_complement(cov_table, x_size):
-    A = cov_table[:x_size, :x_size]
-    B = cov_table[:x_size, x_size:]
-    C = cov_table[x_size:, :x_size]
-    D = cov_table[x_size:, x_size:]
+    estimated_mutual_information = .5 * torch.log((torch.det(x_cov) / torch.det(schur_complement)))
+    return estimated_mutual_information.item()
+
+def _compute_schur_complement(cov_table, released_data_size):
+    A = cov_table[:released_data_size, :released_data_size]
+    B = cov_table[:released_data_size, released_data_size:]
+    C = cov_table[released_data_size:, :released_data_size]
+    D = cov_table[released_data_size:, released_data_size:]
 
     return A - B * torch.pinverse(D) * C

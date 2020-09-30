@@ -1,6 +1,6 @@
 import torch
 
-from privpack import hamming_distance
+from privpack import hamming_distance, elementwise_mse
 
 class Loss():
     def __init__(self):
@@ -31,8 +31,8 @@ class PrivacyLoss(Loss):
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
         return self.discrete_mi_loss(release_all_probabilities, likelihood_x)
 
-    def gaussian_mutual_information(self):
-        pass
+    def gaussian_mutual_information_loss(self, log_likelihoods):
+        return log_likelihoods
 
 
 class UtilityLoss(Loss):
@@ -43,7 +43,6 @@ class UtilityLoss(Loss):
 
     def _expected_loss(self, release_all_probabilities, losses):
         expected_distortion = torch.mul(losses, release_all_probabilities).sum(dim=1)
-        # print(expected_distortion)
         return self.lambd * torch.max(torch.zeros_like(expected_distortion),
                                       (expected_distortion - self.delta_constraint)) ** 2
 
@@ -56,3 +55,14 @@ class UtilityLoss(Loss):
         hamming_distances = torch.cat((hamming_distance_zeros, hamming_distance_ones), dim=1)
 
         return self._expected_loss(release_all_probabilities, hamming_distances)
+
+    def expected_mean_squared_error(self, releases, expected):
+        summed_mse = torch.zeros(expected.size(1), 1)
+        for release in releases:
+            mse = elementwise_mse(releases, expected)
+            summed_mse += mse.view(summed_mse.size())
+
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(summed_mse.size(0)).view(summed_mse.size())
+
+        return self._expected_loss(probabilities, summed_mse)
