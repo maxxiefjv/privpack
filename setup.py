@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="privpack-maxxiefjv", # Replace with your own username
-    version="0.0.1",
+    version="0.0.2",
     author="Max Vasterd",
     author_email="vasterd97@gmail.com",
     description="A small package providing the tools to learn a GAN to preserve privacy.",
@@ -19,4 +19,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        'torch',
+        'numpy',
+        'scipy'
+    ]
 )
