@@ -87,3 +87,32 @@ def test_discrete_hamming_distance(mock_release_probabilities, mock_public_value
 
     actual_out = UtilityLoss(lambd, delta_constraint).expected_binary_hamming_distance(mock_release_probabilities, mock_public_values)
     assert torch.all(torch.isclose(actual_out, expected_out))
+
+def test_gauss_mean_squared_error_loss():
+    (lambd, delta_constraint) = (1, 0)
+
+    mock_released_samples = torch.Tensor([
+        [0.25],
+        [0.75],
+        [0],
+        [1]
+    ]).repeat(5, 1, 1)
+
+    mock_expected_samples = torch.Tensor([
+        [0.3],
+        [0.5],
+        [0.9],
+        [0.3],
+    ])
+
+    actual_out = UtilityLoss(lambd, delta_constraint).expected_mean_squared_error(mock_released_samples, mock_expected_samples)
+
+    expected_out = torch.Tensor([
+        ((0.25 - 0.3) ** 2) ** 2,
+        ((0.75 - 0.5) ** 2) ** 2,
+        ((0 - 0.9) ** 2) ** 2,
+        ((1 - 0.3) ** 2) ** 2,
+    ])
+
+    print(expected_out, actual_out)
+    assert torch.all(torch.isclose(actual_out, expected_out))
