@@ -105,8 +105,8 @@ class GenerativeAdversarialNetwork(abc.ABC):
         network_statistics_test = compute_released_data_statistics(released_samples_test_data, test_data, self.network_statistic_functions)
 
         network_statistics = {
-            'train' : network_statistics_train,
-            'test' : network_statistics_test,
+            'train': network_statistics_train,
+            'test': network_statistics_test,
         }
 
         return network_statistics
@@ -119,16 +119,16 @@ class GenerativeAdversarialNetwork(abc.ABC):
         network_statistics = self._get_network_statistics(train_data, test_data)
         print('epoch: {}, time: {:.3f}s, Adversary loss: {:.3f}, Privatizer loss: {:.3f}'.format(
             epoch, elapsed, adversary_loss, privatizer_loss))
-        
+
         if bool(network_statistics):
             print('{}'.format(network_statistics))
 
     def train(self, train_data, test_data, epochs,
-              batch_size=1, 
-              privatizer_train_every_n=1, 
+              batch_size=1,
+              privatizer_train_every_n=1,
               adversary_train_every_n=1,
               data_sampler=None, k=1):
-        
+
         """
         Train the Generative Adversarial Network using the implemented privatizer and adversary network.
         The privatizer network and adversary network are both trained using the supplied `train_data`. However,
@@ -277,15 +277,15 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
             self.privatizer.parameters(), lr=self.lr)
 
     def _get_likelihoods(self, x_batch):
-        x_likelihoods_given_zeros = get_likelihood_xi_given_z(self.adversary(torch.zeros(x_batch.size(0),1)), x_batch)
-        x_likelihoods_given_ones = get_likelihood_xi_given_z(self.adversary(torch.ones(x_batch.size(0),1)), x_batch)
+        x_likelihoods_given_zeros = get_likelihood_xi_given_z(self.adversary(torch.zeros(x_batch.size(0), 1)), x_batch)
+        x_likelihoods_given_ones = get_likelihood_xi_given_z(self.adversary(torch.ones(x_batch.size(0), 1)), x_batch)
         x_likelihoods = torch.cat((x_likelihoods_given_zeros, x_likelihoods_given_ones), dim=1)
         return x_likelihoods
 
     def _update_adversary(self, entry, x_batch, y_batch):
         released = self.privatizer(entry).detach()
         x_likelihoods = self._get_likelihoods(x_batch)
-       
+
         # Get sample mean
         adversary_loss = self._adversary_criterion(released, x_likelihoods, y_batch).mean()
         adversary_loss.backward()
