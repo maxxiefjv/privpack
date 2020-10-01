@@ -3,19 +3,7 @@ Generative adversarial networks to release Binary and Gaussian data,
 this module defines the following classes:
 
 - `GenerativeAdversarialNetwork`
-
-Exception classes:
-
-Functions:
-
-
-How to use this module
-======================
-(See the individual classes, methods and attributes for more details)
-
-1. Import .... TODO
-
-2. Define a instance .... TODO
+- `BinaryPrivacyPreservingAdversarialNetwork`
 
 """
 
@@ -27,17 +15,18 @@ import json
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 
 from torch.utils.data import DataLoader
 from torch.distributions.multivariate_normal import MultivariateNormal
 
-from privpack import compute_released_data_statistics
-from privpack import binary_bivariate_distortion_zy, binary_bivariate_mutual_information_zx, binary_bivariate_mutual_information_zy
-from privpack import compute_mutual_information_gaussian_zy, compute_mutual_information_gaussian_zx, compute_mse_distortion_zy
-from privpack import get_likelihood_xi_given_z
-from privpack import sampled_data_from_network
+from privpack.utils import compute_released_data_statistics
+from privpack.utils import (
+    ComputeDistortion, PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation,
+    hamming_distance, elementwise_mse
+)
+from privpack.utils import get_likelihood_xi_given_z
+from privpack.utils import sample_from_network
 
 class GenerativeAdversarialNetwork(abc.ABC):
 
@@ -49,20 +38,22 @@ class GenerativeAdversarialNetwork(abc.ABC):
     privatized data optimized in accordance to a privacy-utility trade-off.
     """
 
-    def __init__(self, device, privacy_size, public_size, network_statistics, lr=1e-4):
+    def __init__(self, device, privacy_size, public_size, network_statistics, lr=1e-3):
         """
         Initialize a `GenerativeAdversarialNetwork` object.
 
         Parameters:
 
         - `device`: the device to be used: CPU or CUDA.
-        - `Validator`: The Validator class used to evaluate the current state of the network.
+        - `privacy_size`: The number of dimensions considered private parts.
+        - `public_size`: The number of dimensions considered public parts.
+        - `network_statistics`: A list of statistics used to compute the performance of the network.
         """
-        self.lr = lr
         self.device = device
         self.privacy_size = privacy_size
         self.public_size = public_size
         self.network_statistic_functions = network_statistics
+        self.lr = lr
 
     def set_device(self, device):
         """
@@ -77,14 +68,6 @@ class GenerativeAdversarialNetwork(abc.ABC):
     def get_device(self):
         """Get the device this network is currently using."""
         return self.device
-
-    def get_privatizer(self):
-        """Get a deep copy of the privatizer network that belongs to this network."""
-        return copy.deepcopy(self.privatizer)
-
-    def get_adversary(self):
-        """Get a deep copy of the adversary network that belongs to this network."""
-        return copy.deepcopy(self.adversary)
 
     @abc.abstractmethod
     def _update_adversary(self, entry, x_batch, y_batch):
@@ -102,6 +85,15 @@ class GenerativeAdversarialNetwork(abc.ABC):
 
     @abc.abstractmethod
     def _compute_released_set(self, data):
+        """
+        Privatize the provided data using the privatizer in the network.
+
+        Parameters:
+
+        - `data`: data to be privatized by the network.
+
+        return the privatized version of the provided data.
+        """
         pass
 
     def _get_network_statistics(self, train_data, test_data):
@@ -112,8 +104,8 @@ class GenerativeAdversarialNetwork(abc.ABC):
             released_samples_train_data = self._compute_released_set(train_data)
             released_samples_test_data = self._compute_released_set(test_data)
 
-        network_statistics_train = compute_released_data_statistics(released_samples_train_data, train_data, self.network_statistic_functions, self.privacy_size)
-        network_statistics_test = compute_released_data_statistics(released_samples_test_data, test_data, self.network_statistic_functions, self.privacy_size)
+        network_statistics_train = compute_released_data_statistics(released_samples_train_data, train_data, self.network_statistic_functions)
+        network_statistics_test = compute_released_data_statistics(released_samples_test_data, test_data, self.network_statistic_functions)
 
         network_statistics = {
             'train': network_statistics_train,
@@ -152,6 +144,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         - `train_data`: the training data used for training the generative adversarial network.
         - `test_data`: the testing data used for printing validation results on the generative adversarial network.
         - `batch_size`: The batch size used when training with the supplied `train_data`.
+        - `lr`: Learning Rate indicating the step-size of adjusting the network parameters.
         - `privatizer_train_every_n`: Parameter defining when to update the privatizer network; Default=1.
         - `adversary_train_every_n`: Parameter defining when to update the adversary network; Default=1.
         - `data_sampler`: Function used for generating samples by the privatizer network.
@@ -216,11 +209,24 @@ class GenerativeAdversarialNetwork(abc.ABC):
                 if i % 1000 == 0:
                     self._print_network_update(train_data, test_data, epoch, elapsed, adversary_loss.item(), privatizer_loss.item())
 
-class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
+class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
+    """
+    A Binary implementation of the Generative Adversarial Network defined using the PyTorch library.
+
+    This class implements the Generative Adversarial Base framework and thereby defines this class
+    to produce a single privacy preserved binary output given two binary inputs. This is done using the
+    defined privatizer network. The adversary network estimates the probability of the original private value.
+    How the networks are to learn the best outputs is learned using user provided criterions. It is expected
+    to be according to an optimal Privacy-Utility Trade-off.
+    """
 
     class _Privatizer(nn.Module):
+        """
+        Privatizer network consisting of a single linear transformation followed by the non-linear
+        Sigmoid activation.
+        """
         def __init__(self, ppan):
-            super(BinaryGenerativeAdversarialNetwork._Privatizer, self).__init__()
+            super().__init__()
             self.ppan = ppan
             self.model = nn.Sequential(
                 nn.Linear(ppan.n_noise + ppan.inp_size, 1, bias=False),
@@ -228,6 +234,15 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
             )
 
         def get_one_hot_encoded_input(self, w):
+            """
+                Transform our 2D w to a one-hot encoded alternative:
+
+                W ->(x==0,x==1,y==0,y==1)
+                (0,0) -> (1, 0, 1, 0)
+                (1,0) -> (0, 1, 1, 0)
+                (0,1) -> (1, 0, 0, 1)
+                (1,1) -> (0, 1, 0, 1)
+            """
             w = w.view(-1, 2)
             x = w[:, 0]
             y = w[:, 1]
@@ -243,8 +258,12 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
             return self.model(self.get_one_hot_encoded_input(w))
 
     class _Adversary(nn.Module):
+        """
+        Adversary network consisting of a single linear transformation followed by the non-linear
+        Sigmoid activation
+        """
         def __init__(self, ppan):
-            super(BinaryGenerativeAdversarialNetwork._Adversary, self).__init__()
+            super().__init__()
             self.model = nn.Sequential(
                 nn.Linear(1, 1, bias=False),
                 nn.Sigmoid()
@@ -253,19 +272,24 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
         def forward(self, x):
             return self.model(x)
 
-    def __init__(self, device, privatizer_criterion, adversary_criterion, lr=1e-4,
-                 privatizer_train_every_n=5, adversary_train_every_n=1):
-        super().__init__(device, 1, 1, [
-            binary_bivariate_mutual_information_zx,
-            binary_bivariate_mutual_information_zy,
-            binary_bivariate_distortion_zy
+    def __init__(self, device, privatizer_criterion, adversary_criterion, lr=1e-2):
+        """
+        The behavior of the `BinaryPrivacyPreservingAdversarialNetwork` is mostly defined by the privatizer
+        and adversary criterion provided on init.
+
+        Parameters:
+
+        - `privatizer_criterion`: Identifies how to compute the loss of the privatizer netwowrk.
+        - `adversary_criterion`: Identifies how to compute the loss of the adversary netwowrk.
+        """
+        super().__init__(device, privacy_size=1, public_size=1, network_statistics=[
+            PartialBivariateBinaryMutualInformation('E[MI_ZX]', 0),
+            PartialBivariateBinaryMutualInformation('E[MI_ZY]', 1),
+            ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
         ], lr=lr)
 
         self.n_noise = 0  # Size of the noise vector
         self.inp_size = 4
-
-        self.privatizer_train_every_n = privatizer_train_every_n
-        self.adversary_train_every_n = adversary_train_every_n
 
         self.adversary = self._Adversary(self).to(device)
         self.privatizer = self._Privatizer(self).to(device)
@@ -279,9 +303,15 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
         self._adversary_criterion = adversary_criterion
 
     def __str__(self) -> str:
+        """
+        Informal string representation of this class.
+        """
         return "Binary Privacy-Preserving Adversarial Network"
 
     def reset(self) -> None:
+        """
+        Provides the possibility to undo all the learned parameters.
+        """
         self.adversary = self._Adversary(self).to(self.device)
         self.privatizer = self._Privatizer(self).to(self.device)
 
@@ -290,18 +320,51 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
         self.privatizer_optimizer = optim.Adam(
             self.privatizer.parameters(), lr=self.lr)
 
+    def save(self):
+        """
+        Save the networks learned parameters.
+        """
+        raise NotImplementedError("Save function not yet implemented")
+
+    def load(self):
+        """
+        Load the parameters of the privatizer and adversary network.
+        """
+        raise NotImplementedError("Load function not yet implemented")
+
     def _compute_released_set(self, data):
         released_data = self.privatizer(data)
         random_uniform_tensor = torch.rand(released_data.size())
         return torch.ceil(released_data - random_uniform_tensor).to(torch.int).view(-1, 1)
 
     def _get_likelihoods(self, x_batch):
+        """
+        Get the likelihoods of the provided x_batch for both values of the possible releases: {0,1}.
+
+        Parameters:
+
+        - `x_batch`: Compute the likelihood of this data estimated by the adversary
+
+        return the likelihoods for the provided data given both possible releases.
+        """
         x_likelihoods_given_zeros = get_likelihood_xi_given_z(self.adversary(torch.zeros(x_batch.size(0), 1)), x_batch)
         x_likelihoods_given_ones = get_likelihood_xi_given_z(self.adversary(torch.ones(x_batch.size(0), 1)), x_batch)
         x_likelihoods = torch.cat((x_likelihoods_given_zeros, x_likelihoods_given_ones), dim=1)
         return x_likelihoods
 
     def _update_adversary(self, entry, x_batch, y_batch):
+        """
+        This function is called every, depending on the train parameters, nth iteration. It is
+        used to update the adversary network, and should do so using: the full entry, private and public parts.
+
+        Parameters:
+
+        - `entry`: concatenated version of (x_batch,y_batch).
+        - 'x_batch`: private parts of entry.
+        - `y_batch`: public parts of entry.
+
+        return the adversary loss computed by `adversary_criterion`
+        """
         released = self.privatizer(entry).detach()
         x_likelihoods = self._get_likelihoods(x_batch)
 
@@ -314,6 +377,18 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
         return adversary_loss
 
     def _update_privatizer(self, entry, x_batch, y_batch):
+        """
+        This function is called every, depending on the train parameters, nth iteration. It is
+        used to update the privatizer network, and should do so using: the full entry, private and public parts.
+
+        Parameters:
+
+        - `entry`: concatenated version of (x_batch,y_batch).
+        - 'x_batch`: private parts of entry.
+        - `y_batch`: public parts of entry.
+
+        return the adversary loss computed by `privatizer_criterion`
+        """
         released = self.privatizer(entry)
         x_likelihoods = self._get_likelihoods(x_batch).detach()
 
@@ -325,16 +400,25 @@ class BinaryGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
 
         return privatizer_loss
 
-    def train(self, train_data, test_data, epochs, batch_size=1):
+    def train(self, train_data, test_data, epochs, batch_size=1, privatizer_train_every_n=5, adversary_train_every_n=1):
         return super().train(train_data, test_data, epochs, k=None,
                              batch_size=batch_size, data_sampler=None,
-                             privatizer_train_every_n=self.privatizer_train_every_n, adversary_train_every_n=self.adversary_train_every_n)
+                             privatizer_train_every_n=privatizer_train_every_n,
+                             adversary_train_every_n=adversary_train_every_n)
 
-class GaussianGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
+class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
+    """
+    A Gaussian implementation of the Generative Adversarial Network defined using the PyTorch library.
 
+    This class implements the Generative Adversarial Base framework and thereby defines this class
+    to produce privatized gaussian outputs given assumed to be gaussian inputs. This is done using the
+    defined privatizer network. The adversary network estimates the probability of the original private value.
+    How the networks are to learn the best outputs is learned using user provided criterions. It is expected
+    to be according to an optimal Privacy-Utility Trade-off.
+    """
     class _Privatizer(nn.Module):
         def __init__(self, ppan):
-            super(GaussianGenerativeAdversarialNetwork._Privatizer, self).__init__()
+            super(GaussianPrivacyPreservingAdversarialNetwork._Privatizer, self).__init__()
             self.ppan = ppan
 
             self.model = nn.Sequential(
@@ -360,7 +444,7 @@ class GaussianGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
 
     class _Adversary(nn.Module):
         def __init__(self, ppan):
-            super(GaussianGenerativeAdversarialNetwork._Adversary, self).__init__()
+            super(GaussianPrivacyPreservingAdversarialNetwork._Adversary, self).__init__()
             self.inp_size = ppan.release_size
             self.out_size = self.inp_size * 2
 
@@ -386,21 +470,36 @@ class GaussianGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
             return self.model(x)
 
     def __init__(self, device, privacy_size, public_size, release_size,
-                 privatizer_criterion, adversary_criterion, noise_size=5,
-                 no_hidden_units_per_layer=20,
-                 lr=1e-3, privatizer_train_every_n=5, adversary_train_every_n=1):
+                 privatizer_criterion, adversary_criterion, lr=1e-3, noise_size=5,
+                 no_hidden_units_per_layer=20):
+        """
+        The behavior of the `GaussianPrivacyPreservingAdversarialNetwork` is mostly defined by the privatizer
+        and adversary criterion provided on init. This defines how to learn the best Privacy-Utility Trade-off
+        parameters for the privatizer and adversary network.
 
+        Data used in this network should be private data first then public data. e.g. Consider W to consist of
+        private (X) and public (Y) data then: W <=> (X,Y).
+
+        Parameters:
+
+        - `privacy_size`: The number of private dimensions in the data used with this network.
+        - `public_size`: The number of public dimensions in the data used with this network.
+        - `release_size`: The number of dimensions the privatizer network should produce.
+        - `privatizer_criterion`: Identifies how to compute the loss of the privatizer network.
+        - `adversary_criterion`: Identifies how to compute the loss of the adversary network.
+        - `noise_size`: The number of noise dimension to add to the input of the privatizer network. Needed
+        for the universal approximator mechanisms to work.
+        - `no_hidden_units_per_layer`: Every layer in the gaussian network will have the number of nodes defined
+        by this parameter.
+        """
         super().__init__(device, privacy_size, public_size, [
-            compute_mutual_information_gaussian_zx,
-            compute_mutual_information_gaussian_zy,
-            compute_mse_distortion_zy
-        ], lr)
+            PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),
+            PartialMultivariateGaussianMutualInformation('E[MI_YZ]', range(privacy_size, privacy_size + public_size)),
+            ComputeDistortion('E[mse(z,y)]', range(privacy_size, privacy_size + public_size)).set_distortion_function(elementwise_mse)
+        ], lr=lr)
         self.no_hidden_units_per_layer = no_hidden_units_per_layer
         self.n_noise = noise_size
         self.release_size = release_size
-
-        self.privatizer_train_every_n = privatizer_train_every_n
-        self.adversary_train_every_n = adversary_train_every_n
 
         self.device = device
 
@@ -456,6 +555,7 @@ class GaussianGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
             normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
         except Exception:
             print(adv_mu, adv_cov)
+            self.adversary = self._Adversary(self).to(self.device)
             adv_cov = torch.square(torch.randn_like(adv_cov)) + adv_cov
             adv_mu = torch.randn_like(adv_mu) + adv_mu
             normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
@@ -510,8 +610,8 @@ class GaussianGenerativeAdversarialNetwork(GenerativeAdversarialNetwork):
 
         return privatizer_loss
 
-    def train(self, train_data, test_data, epochs, k=1, batch_size=2):
+    def train(self, train_data, test_data, epochs, k=1, batch_size=2, privatizer_train_every_n=5, adversary_train_every_n=1):
         return super().train(train_data, test_data, epochs, k=k,
-                             batch_size=batch_size, data_sampler=sampled_data_from_network,
-                             privatizer_train_every_n=self.privatizer_train_every_n,
-                             adversary_train_every_n=self.adversary_train_every_n)
+                             batch_size=batch_size, data_sampler=sample_from_network,
+                             privatizer_train_every_n=privatizer_train_every_n,
+                             adversary_train_every_n=adversary_train_every_n)
