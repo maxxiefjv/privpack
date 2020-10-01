@@ -1,12 +1,43 @@
+"""
+The loss-function defined in this module are used to learn the optimal
+direction for a privatizer network.
+
+This module defines the following classes:
+
+- `PrivacyLoss`
+- `UtilityLoss`
+
+"""
+
 import torch
 
-from privpack import hamming_distance, elementwise_mse
+from privpack.utils import hamming_distance, elementwise_mse
 
 class Loss():
     def __init__(self):
         pass
 
+    def _expected_loss(self, release_probabilities, losses):
+        """
+        Parameters:
+
+        - `release_probabilities`: probability of obtaining corresponding loss
+        - `losses`: losses computed using one of the subclasses' functions
+
+        return the expected loss for each entry.
+        """
+        return torch.mul(release_probabilities, losses).sum(dim=1)
+
 class PrivacyLoss(Loss):
+    """
+    Privacy Loss is a component including loss function correlated to Information Theoretic Losses.
+
+    Using these loss function optimum can be achieved for:
+
+    - Mutual Information
+    - Maximal Leakage
+    - Alpha-Tunable Information Leakage
+    """
 
     def __init__(self):
         pass
@@ -22,7 +53,7 @@ class PrivacyLoss(Loss):
 
         return the mutual information for discrete values.
         """
-        return torch.mul(release_all_probabilities, torch.log2(likelihood_x)).sum(dim=1)
+        return super()._expected_loss(release_all_probabilities, torch.log2(likelihood_x))
 
     def binary_mi_loss(self, release_probabilities, likelihood_x):
         """
@@ -31,22 +62,42 @@ class PrivacyLoss(Loss):
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
         return self.discrete_mi_loss(release_all_probabilities, likelihood_x)
 
-    def gaussian_mutual_information_loss(self, log_likelihoods):
-        return log_likelihoods
+    def gaussian_mutual_information_loss(self, releases, log_likelihoods):
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
+        return super()._expected_loss(probabilities, log_likelihoods)
 
 
 class UtilityLoss(Loss):
+    """
+    Utitlity loss concerns itself with loss function related to utility/distortion (or disutility). Each
+    utility loss is computed according to the formula:
+
+    :math:`\\lambda max(0, E[d(X,Y)] - \\delta)^2`
+
+    At the moment this class includes:
+
+    - Hamming distance
+    """
 
     def __init__(self, lambd, delta_constraint):
         self.lambd = lambd
         self.delta_constraint = delta_constraint
 
     def _expected_loss(self, release_all_probabilities, losses):
-        expected_distortion = torch.mul(losses, release_all_probabilities).sum(dim=1)
+        expected_distortion = super()._expected_loss(release_all_probabilities, losses)
         return self.lambd * torch.max(torch.zeros_like(expected_distortion),
                                       (expected_distortion - self.delta_constraint)) ** 2
 
     def expected_binary_hamming_distance(self, release_probabilities, expected):
+        """
+        Compute the hamming distance for both possible binary values.
+
+        Parameters:
+
+        - `probability_releases`: tensor of probabilities per release option: z=0 and z=1.
+        - `expected`: expected/most utility release values.
+        """
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
 
         hamming_distance_zeros = hamming_distance(torch.zeros_like(expected), expected).view(-1, 1)
@@ -57,11 +108,20 @@ class UtilityLoss(Loss):
         return self._expected_loss(release_all_probabilities, hamming_distances)
 
     def expected_mean_squared_error(self, releases, expected):
-        summed_mse = torch.zeros(expected.size(1), 1)
+        """
+        Compute the mean squared error (MSE) between the releases and most utility values.
+
+        Parameters:
+
+        - `releases`: tensor of all releases done by some privatizer network.
+        - `expected`: expected/most utility release values.
+        """
+        summed_mse = torch.zeros(releases.size(1))
         for release in releases:
-            mse = elementwise_mse(releases, expected)
+            mse = elementwise_mse(release, expected)
             summed_mse += mse.view(summed_mse.size())
 
+        summed_mse = summed_mse.unsqueeze(1)
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(summed_mse.size(0)).view(summed_mse.size())
 
