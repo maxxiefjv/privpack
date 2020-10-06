@@ -105,10 +105,19 @@ class MultivariateGaussianMutualInformation(Statistic):
 
         return A - B * torch.pinverse(D) * C
 
+    def _get_positive_definite_covariance(self, numpy_release, numpy_data):
+        release_no_cols = numpy_release.shape[1]
+        data_no_cols = numpy_data.shape[1]
+
+        return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.random.uniform(0, 1e-3,
+                                                               size=release_no_cols + data_no_cols))
+
     def mi(self, released_data, data):
         numpy_release = released_data.cpu().numpy()
         numpy_data = data.cpu().numpy()
-        return self._compute_mutual_information(np.cov(numpy_data.T, numpy_release.T), released_data.size(1))
+
+        full_cov = self._get_positive_definite_covariance(numpy_release, numpy_data)
+        return self._compute_mutual_information(full_cov, released_data.size(1))
 
     def __call__(self, released_data, data):
         return self.mi(released_data, data)
