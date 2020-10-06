@@ -30,13 +30,6 @@ def uncorrelated_train_and_test_data():
     test_data = torch.Tensor(synthetic_data[5:])
     return (train_data, test_data)
 
-@pytest.fixture
-def mock_release_probabilities():
-    return torch.Tensor([
-        [0.6],
-        [0.3],
-        [0.1]
-    ])
 
 def test_compute_binary_released_set():
     mock_uniform_rdata = torch.Tensor([

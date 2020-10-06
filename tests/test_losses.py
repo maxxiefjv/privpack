@@ -6,14 +6,6 @@ import pytest
 from privpack.losses import PrivacyLoss, UtilityLoss
 
 @pytest.fixture
-def mock_release_probabilities():
-    return torch.Tensor([
-        [0.6],
-        [0.3],
-        [0.1]
-    ])
-
-@pytest.fixture
 def mock_x_likelihoods():
     return torch.Tensor([
         [0.7, 0.6],
