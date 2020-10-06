@@ -98,6 +98,14 @@ class MultivariateGaussianMutualInformation(Statistic):
         return estimated_mutual_information.item()
 
     def _compute_schur_complement(self, cov_table, released_data_size):
+        """
+        Get elements from cov_table such that:
+
+        | A B |
+        | C D |
+
+        Consequently return the schur complement: A - B * pinv(D) * C
+        """
         A = cov_table[:released_data_size, :released_data_size]
         B = cov_table[:released_data_size, released_data_size:]
         C = cov_table[released_data_size:, :released_data_size]
@@ -106,6 +114,10 @@ class MultivariateGaussianMutualInformation(Statistic):
         return A - B * torch.pinverse(D) * C
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
+        """
+        Get the covariance matrix of the matrix [numpy_release, numpy_data]. Add small uniform noise
+        to guarantee a positive definite covariance matrix.
+        """
         release_no_cols = numpy_release.shape[1]
         data_no_cols = numpy_data.shape[1]
 
@@ -113,6 +125,9 @@ class MultivariateGaussianMutualInformation(Statistic):
                                                                size=release_no_cols + data_no_cols))
 
     def mi(self, released_data, data):
+        """
+        Collect the results of the helper functions, and return the mutual information.
+        """
         numpy_release = released_data.cpu().numpy()
         numpy_data = data.cpu().numpy()
 
