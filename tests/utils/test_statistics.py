@@ -11,7 +11,7 @@ def train_data():
     """
     The generated data consists of 10 columns, generated using the DataGenerator.get_ppan_distribution_params function.
     """
-    return np.loadtxt('static_train_data.csv', delimiter=',')
+    return np.loadtxt('tests/data/static_train_data.csv', delimiter=',')
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def test_data():
     """
     The generated data consists of 10 columns, generated using the DataGenerator.get_ppan_distribution_params function.
     """
-    return np.loadtxt('static_test_data.csv', delimiter=',')
+    return np.loadtxt('tests/data/static_test_data.csv', delimiter=',')
 
 
 def test_compute_schur_complement_static_train_data(train_data):
