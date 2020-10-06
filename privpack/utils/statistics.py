@@ -97,6 +97,21 @@ class MultivariateGaussianMutualInformation(Statistic):
         estimated_mutual_information = .5 * torch.log((torch.det(x_cov) / torch.det(schur_complement)))
         return estimated_mutual_information.item()
 
+    def _prepare_schur_complement(self, cov_table, released_data_size):
+        """
+        Get elements from cov_table such that:
+
+        | A B |
+        | C D |
+
+        """
+        A = cov_table[:released_data_size, :released_data_size]
+        B = cov_table[:released_data_size, released_data_size:]
+        C = cov_table[released_data_size:, :released_data_size]
+        D = cov_table[released_data_size:, released_data_size:]
+
+        return (A, B, C, D)
+
     def _compute_schur_complement(self, cov_table, released_data_size):
         """
         Get elements from cov_table such that:
@@ -104,14 +119,10 @@ class MultivariateGaussianMutualInformation(Statistic):
         | A B |
         | C D |
 
-        Consequently return the schur complement: A - B * pinv(D) * C
+        Consequently return the schur complement of the A block: D - C * pinv(A) * B
         """
-        A = cov_table[:released_data_size, :released_data_size]
-        B = cov_table[:released_data_size, released_data_size:]
-        C = cov_table[released_data_size:, :released_data_size]
-        D = cov_table[released_data_size:, released_data_size:]
-
-        return A - B * torch.pinverse(D) * C
+        (A, B, C, D) = self._prepare_schur_complement(cov_table, released_data_size)
+        return D - C * torch.pinverse(A) * B
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
         """
