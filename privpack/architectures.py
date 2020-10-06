@@ -294,6 +294,9 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary = self._Adversary(self).to(device)
         self.privatizer = self._Privatizer(self).to(device)
 
+        self.adversary.apply(self._weights_init)
+        self.privatizer.apply(self._weights_init)
+
         self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr)
         self.privatizer_optimizer = optim.Adam(
@@ -301,6 +304,13 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         self._privatizer_criterion = privatizer_criterion
         self._adversary_criterion = adversary_criterion
+
+    def _weights_init(self, m):
+        classname = m.__class__.__name__
+        if classname.find('BatchNorm') != -1:
+            torch.nn.init.normal_(m.weight, 0.0, 1)
+        elif classname.find('Linear') != -1:
+            torch.nn.init.normal_(m.weight, 0.0, 1)
 
     def __str__(self) -> str:
         """
@@ -506,6 +516,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary = self._Adversary(self).to(device)
         self.privatizer = self._Privatizer(self).to(device)
 
+        self.adversary.apply(self._weights_init)
+        self.privatizer.apply(self._weights_init)
+
         self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr)
         self.privatizer_optimizer = optim.Adam(
@@ -534,6 +547,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary = self._Adversary(self).to(self.device)
         self.privatizer = self._Privatizer(self).to(self.device)
 
+        self.adversary.apply(self._weights_init)
+        self.privatizer.apply(self._weights_init)
+
         self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr)
         self.privatizer_optimizer = optim.Adam(
@@ -541,6 +557,14 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         self.mus = torch.Tensor([])
         self.covs = torch.Tensor([])
+
+    def _weights_init(self, m):
+        classname = m.__class__.__name__
+        if classname.find('BatchNorm') != -1:
+            torch.nn.init.normal_(m.weight, 0.0, 1)
+        elif classname.find('Linear') != -1:
+            # print(m.weight)
+            torch.nn.init.normal_(m.weight, 0.0, 1)
 
     def _compute_released_set(self, data):
         released_set = self.privatizer(data)
