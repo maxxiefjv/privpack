@@ -2,9 +2,12 @@ from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
 from privpack.losses import PrivacyLoss, UtilityLoss
 from privpack.utils import DataGenerator
+from privpack.utils.statistics import MultivariateGaussianMutualInformation
+
 
 import torch
 import pytest
+import numpy as np
 
 @pytest.fixture
 def lambda_and_delta():
@@ -136,10 +139,51 @@ def test_gaussian_get_expected_x_likelihoods():
 
     (privacy_size, public_size, release_size, noise_size) = (1, 1, 1, 1)
 
-    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None, no_hidden_units_per_layer=5, noise_size=1)
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+                         no_hidden_units_per_layer=5, noise_size=1)
     x_likelihoods = gauss_gan._get_expected_log_likelihoods(mock_released_samples, mock_x_batch)
     assert x_likelihoods.size() == torch.Size([mock_x_batch.size(0), 1])
 
+def is_pos_def(x):
+    return np.all(np.linalg.eigvals(x) > 0)
+
+@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
+def test_gaussian_release_output_schur_complement(fixed_train_data):
+    (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+                         no_hidden_units_per_layer=5, noise_size=1)
+
+    multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
+
+    released_data = gauss_gan.privatizer(torch.Tensor(fixed_train_data)).detach()
+    XZ_cov = torch.Tensor(multivariate_gauss_statistic._get_positive_definite_covariance(released_data.numpy(),
+                                                                                         fixed_train_data[:, :privacy_size]))
+
+    print("Covariance Matrix is positive semi definite: {}".format(is_pos_def(XZ_cov)))
+    schur_complement = multivariate_gauss_statistic._compute_schur_complement(XZ_cov, 5)
+
+    assert schur_complement.size() == torch.Size([5, 5])
+    assert torch.det(schur_complement) > 0
+
+@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
+def test_gaussian_release_output_schur_100_times(fixed_train_data):
+    (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
+    multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+                         no_hidden_units_per_layer=5, noise_size=1)
+
+    for i in range(10):
+        gauss_gan.reset()
+        released_data = gauss_gan.privatizer(torch.Tensor(fixed_train_data)).detach()
+
+        XZ_cov = torch.Tensor(multivariate_gauss_statistic._get_positive_definite_covariance(released_data.numpy(),
+                                                                                             fixed_train_data[:, :privacy_size]))
+        print("Covariance Matrix is positive semi definite: {}".format(is_pos_def(XZ_cov)))
+        schur_complement = multivariate_gauss_statistic._compute_schur_complement(XZ_cov, 5)
+        print("Schur complement is positive semi definite: {}".format(is_pos_def(schur_complement)))
+
+        assert schur_complement.size() == torch.Size([5, 5])
+        assert torch.det(schur_complement) > 0
 
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():
@@ -170,5 +214,5 @@ def test_gaussian_get_expected_x_likelihoods():
 #     gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, privatizer_criterion, adversary_criterion, no_hidden_units_per_layer=5, noise_size=1)
 #     (mu, cov) = DataGenerator.get_completely_uncorrelated_distribution_params(privacy_size, public_size)
 
-#     (gm_train, gm_test) = DataGenerator.generate_gauss_mixture_data(mu, cov)
+#     (gm_train, gm_test) = DataGenerator.generate_gauss_mixture_data(mu, cov, seed=0)
 #     gauss_gan.train(gm_train, gm_test, epochs, k=1)
