@@ -20,7 +20,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.distributions.multivariate_normal import MultivariateNormal
 
-from privpack.utils import compute_released_data_statistics
+from privpack.utils import compute_released_data_metrics
 from privpack.utils import (
     ComputeDistortion, PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation,
     hamming_distance, elementwise_mse
@@ -38,7 +38,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
     privatized data optimized in accordance to a privacy-utility trade-off.
     """
 
-    def __init__(self, device, privacy_size, public_size, network_statistics, lr=1e-3):
+    def __init__(self, device, privacy_size, public_size, metrics, lr=1e-3):
         """
         Initialize a `GenerativeAdversarialNetwork` object.
 
@@ -47,12 +47,12 @@ class GenerativeAdversarialNetwork(abc.ABC):
         - `device`: the device to be used: CPU or CUDA.
         - `privacy_size`: The number of dimensions considered private parts.
         - `public_size`: The number of dimensions considered public parts.
-        - `network_statistics`: A list of statistics used to compute the performance of the network.
+        - `metrics`: A list of metric used to compute the performance of the network.
         """
         self.device = device
         self.privacy_size = privacy_size
         self.public_size = public_size
-        self.network_statistic_functions = network_statistics
+        self.metrics = metrics
         self.lr = lr
 
     def set_device(self, device):
@@ -96,7 +96,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         """
         pass
 
-    def _get_network_statistics(self, train_data, test_data):
+    def _get_metric_results(self, train_data, test_data):
         if len(self.network_statistic_functions) == 0:
             return {}
 
@@ -104,27 +104,27 @@ class GenerativeAdversarialNetwork(abc.ABC):
             released_samples_train_data = self._compute_released_set(train_data)
             released_samples_test_data = self._compute_released_set(test_data)
 
-        network_statistics_train = compute_released_data_statistics(released_samples_train_data, train_data, self.network_statistic_functions)
-        network_statistics_test = compute_released_data_statistics(released_samples_test_data, test_data, self.network_statistic_functions)
+        metric_results_train = compute_released_data_metrics(released_samples_train_data, train_data, self.metrics)
+        metric_results_test = compute_released_data_metrics(released_samples_test_data, test_data, self.metrics)
 
-        network_statistics = {
-            'train': network_statistics_train,
-            'test': network_statistics_test,
+        metric_results = {
+            'train': metric_results_train,
+            'test': metric_results_test,
         }
 
-        return network_statistics
+        return metric_results
 
     def _print_network_update(self, train_data, test_data, epoch, elapsed, adversary_loss, privatizer_loss):
         """
-            private function created to print the core statistics of the network in its current state.
+            private function created to print the core metrics of the network in its current state.
         """
 
-        network_statistics = self._get_network_statistics(train_data, test_data)
+        metric_results = self._get_metric_results(train_data, test_data)
         print('epoch: {}, time: {:.3f}s, Adversary loss: {:.3f}, Privatizer loss: {:.3f}'.format(
             epoch, elapsed, adversary_loss, privatizer_loss))
 
-        if bool(network_statistics):
-            print(json.dumps(network_statistics, sort_keys=True, indent=4))
+        if bool(metric_results):
+            print(json.dumps(metric_results, sort_keys=True, indent=4))
 
     def train(self, train_data, test_data, epochs,
               batch_size=1,
@@ -282,7 +282,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         - `privatizer_criterion`: Identifies how to compute the loss of the privatizer netwowrk.
         - `adversary_criterion`: Identifies how to compute the loss of the adversary netwowrk.
         """
-        super().__init__(device, privacy_size=1, public_size=1, network_statistics=[
+        super().__init__(device, privacy_size=1, public_size=1, metrics=[
             PartialBivariateBinaryMutualInformation('E[MI_ZX]', 0),
             PartialBivariateBinaryMutualInformation('E[MI_ZY]', 1),
             ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
@@ -502,7 +502,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         - `no_hidden_units_per_layer`: Every layer in the gaussian network will have the number of nodes defined
         by this parameter.
         """
-        super().__init__(device, privacy_size, public_size, [
+        super().__init__(device, privacy_size, public_size, metrics=[
             PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),
             PartialMultivariateGaussianMutualInformation('E[MI_YZ]', range(privacy_size, privacy_size + public_size)),
             ComputeDistortion('E[mse(z,y)]', range(privacy_size, privacy_size + public_size)).set_distortion_function(elementwise_mse)

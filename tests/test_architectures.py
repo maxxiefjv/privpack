@@ -2,7 +2,7 @@ from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
 from privpack.losses import PrivacyLoss, UtilityLoss
 from privpack.utils import DataGenerator
-from privpack.utils.statistics import MultivariateGaussianMutualInformation
+from privpack.utils.metrics import MultivariateGaussianMutualInformation
 
 
 import torch

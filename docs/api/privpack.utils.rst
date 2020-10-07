@@ -5,7 +5,7 @@ privpack.utils package
    :maxdepth: 2
 
    utils/data_generator
-   utils/statistics
+   utils/metrics
 
 
 module contents

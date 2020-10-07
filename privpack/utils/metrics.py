@@ -1,6 +1,6 @@
 """
-Statistic classes are used to compute full data-set statistics.
-This module supports the following statistics classes:
+Statistic classes are used to compute full data-set metrics.
+This module supports the following metric classes:
 
 - `PartialBivariateBinaryMutualInformation`
 - `PartialMultivariateGaussianMutualInformation`
@@ -16,25 +16,26 @@ How to use this module
 2. Define a instance .... TODO
 
 """
+from collections.abc import Callable
 import math
 import abc
 import torch
 import numpy as np
 
-class Statistic(abc.ABC):
+class Metric(abc.ABC):
     """
-    Base class for creating full data-set statistics.
+    Base class for creating full data-set Metric.
     """
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
 
     @abc.abstractmethod
     def __call__(self, released_data, data):
         pass
 
-class BivariateBinaryMutualInformation(Statistic):
+class BivariateBinaryMutualInformation(Metric):
 
-    def _compute_mutual_information(self, dist):
+    def _compute_mutual_information(self, dist: torch.Tensor) -> float:
         P_x = [sum(dist[0, :]), sum(dist[1, :])]
         P_y = [sum(dist[:, 0]), sum(dist[:, 1])]
         MI_binXY = 0
@@ -48,7 +49,7 @@ class BivariateBinaryMutualInformation(Statistic):
 
         return MI_binXY
 
-    def _estimate_binary_distribution(self, data):
+    def _estimate_binary_distribution(self, data: torch.Tensor) -> torch.Tensor:
         Px1_y1 = sum([1 for entry in data if entry[0] == 1 and entry[1] == 1]) / len(data)
         Px1_y0 = sum([1 for entry in data if entry[0] == 1 and entry[1] == 0]) / len(data)
         Px0_y1 = sum([1 for entry in data if entry[0] == 0 and entry[1] == 1]) / len(data)
@@ -59,26 +60,26 @@ class BivariateBinaryMutualInformation(Statistic):
             [Px1_y0, Px1_y1]
         ])
 
-    def mi(self, released_data, data) -> float:
+    def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         full_data_tensor = torch.cat((released_data.view(-1, 1), data.view(-1, 1)), dim=1)
         full_data_distribution = self._estimate_binary_distribution(full_data_tensor)
         return self._compute_mutual_information(full_data_distribution).item()
 
-    def __call__(self, released_data, data) -> float:
+    def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.mi(released_data, data)
 
 class PartialBivariateBinaryMutualInformation(BivariateBinaryMutualInformation):
 
-    def __init__(self, name, dimension):
+    def __init__(self, name: str, dimension: int):
         super().__init__(name)
         self.dimension = dimension
 
-    def __call__(self, released_data, data):
+    def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return super().__call__(released_data, data[:, self.dimension])
 
-class MultivariateGaussianMutualInformation(Statistic):
+class MultivariateGaussianMutualInformation(Metric):
 
-    def _compute_mutual_information(self, full_cov_table, released_data_size):
+    def _compute_mutual_information(self, full_cov_table, released_data_size) -> float:
         # TODO: What...torch.square? schur_complement should be invertible.
         full_cov_table = torch.square(torch.Tensor(full_cov_table))
         schur_complement = self._compute_schur_complement(full_cov_table, released_data_size)
@@ -138,7 +139,7 @@ class MultivariateGaussianMutualInformation(Statistic):
         return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.random.uniform(0, 1e-3,
                                                                size=release_no_cols + data_no_cols))
 
-    def mi(self, released_data, data):
+    def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         """
         Collect the results of the helper functions, and return the mutual information.
         """
@@ -153,24 +154,24 @@ class MultivariateGaussianMutualInformation(Statistic):
 
 class PartialMultivariateGaussianMutualInformation(MultivariateGaussianMutualInformation):
 
-    def __init__(self, name, dimensions):
+    def __init__(self, name: str, dimensions: int):
         super().__init__(name)
         self.dimensions = dimensions
 
-    def __call__(self, released_data, data):
+    def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return super().__call__(released_data, data[:, self.dimensions])
 
-class ComputeDistortion(Statistic):
-    def __init__(self, name, dimensions):
+class ComputeDistortion(Metric):
+    def __init__(self, name: str, dimensions: int):
         super().__init__(name)
         self.dimensions = dimensions
 
-    def set_distortion_function(self, distortion_func):
+    def set_distortion_function(self, distortion_func: Callable[[torch.Tensor, torch.Tensor], torch.Tensor]):
         self.distortion = distortion_func
         return self
 
-    def compute_distortion(self, released_data, data):
+    def compute_distortion(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.distortion(released_data, data[:, self.dimensions]).mean().item()
 
-    def __call__(self, released_data, data):
+    def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.compute_distortion(released_data, data)

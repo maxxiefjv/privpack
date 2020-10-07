@@ -1,7 +1,7 @@
-privpack.utils.Statistics module
+privpack.utils.Metrics module
 =================================
 
-.. automodule:: privpack.utils.statistics
+.. automodule:: privpack.utils.metrics
    :members:
    :undoc-members:
    :show-inheritance:

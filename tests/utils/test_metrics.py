@@ -1,5 +1,5 @@
 from privpack.utils import DataGenerator
-from privpack.utils.statistics import MultivariateGaussianMutualInformation
+from privpack.utils.metrics import MultivariateGaussianMutualInformation
 
 import torch
 import numpy as np

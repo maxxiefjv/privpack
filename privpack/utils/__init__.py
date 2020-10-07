@@ -1,14 +1,15 @@
 """
 Utility module containing the most used utilities in this library.
 """
+from typing import List
 from .data_generator import DataGenerator
-from .statistics import (
-    PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation, ComputeDistortion
+from .metrics import (
+    PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation, ComputeDistortion, Metric
 )
 
 import torch
 
-def compute_released_data_statistics(released_data, data, statistics):
+def compute_released_data_metrics(released_data, data, metrics: List[Metric]):
     """
     Utiltity function exectuing every provided statistic to the supploed `released_data`
     and `data`.
@@ -18,12 +19,12 @@ def compute_released_data_statistics(released_data, data, statistics):
     - `released_data`: Ideally data as output from some privatizer mechanisms
     - `data`: Original data obtained from some source
     """
-    statistics_report = {}
-    for statistic in statistics:
-        data_stats = statistic(released_data.detach(), data)
-        statistics_report[statistic.name] = data_stats
+    metrics_report = {}
+    for metric in metrics:
+        data_stats = metric(released_data.detach(), data)
+        metrics_report[metric.name] = data_stats
 
-    return statistics_report
+    return metrics_report
 
 # Bivariate Binary related Utility functions
 def get_likelihood_xi_given_z(adversary_out, Xi):

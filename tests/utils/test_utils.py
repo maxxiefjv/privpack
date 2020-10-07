@@ -1,9 +1,9 @@
 # import torch
-# from privpack import compute_released_data_statistics, binary_bivariate_mutual_information_statistic
+# from privpack import compute_released_data_metrics, binary_bivariate_mutual_information_statistic
 # from privpack import hamming_distance
 # from privpack import binary_bivariate_mutual_information_zx, binary_bivariate_mutual_information_zy, binary_bivariate_distortion_zy
 #
-# def test_compute_released_data_statistics():
+# def test_compute_released_data_metrics():
 #     mock_released_data = torch.Tensor([
 #         [0],
 #         [0],
@@ -24,7 +24,7 @@
 #         'binary_bivariate_distortion_zy': 0.0
 #     }
 
-#     actual = compute_released_data_statistics(mock_released_data, mock_data, [
+#     actual = compute_released_data_metrics(mock_released_data, mock_data, [
 #         binary_bivariate_mutual_information_zx,
 #         binary_bivariate_mutual_information_zy,
 #         binary_bivariate_distortion_zy
