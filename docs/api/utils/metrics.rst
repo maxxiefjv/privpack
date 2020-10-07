@@ -1,4 +1,4 @@
-privpack.utils.Metrics module
+privpack.utils.metrics module
 =================================
 
 .. automodule:: privpack.utils.metrics
