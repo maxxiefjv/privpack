@@ -16,7 +16,8 @@ How to use this module
 2. Define a instance .... TODO
 
 """
-from typing import Callable
+from typing import Callable, List
+
 import math
 import abc
 import torch
@@ -154,7 +155,7 @@ class MultivariateGaussianMutualInformation(Metric):
 
 class PartialMultivariateGaussianMutualInformation(MultivariateGaussianMutualInformation):
 
-    def __init__(self, name: str, dimensions: int):
+    def __init__(self, name: str, dimensions: List[int]):
         super().__init__(name)
         self.dimensions = dimensions
 
@@ -162,7 +163,7 @@ class PartialMultivariateGaussianMutualInformation(MultivariateGaussianMutualInf
         return super().__call__(released_data, data[:, self.dimensions])
 
 class ComputeDistortion(Metric):
-    def __init__(self, name: str, dimensions: int):
+    def __init__(self, name: str, dimensions: List[int]):
         super().__init__(name)
         self.dimensions = dimensions
 
