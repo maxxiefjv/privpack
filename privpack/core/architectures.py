@@ -84,7 +84,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _compute_released_set(self, data):
+    def privatize(self, data):
         """
         Privatize the provided data using the privatizer in the network.
 
@@ -101,8 +101,8 @@ class GenerativeAdversarialNetwork(abc.ABC):
             return {}
 
         with torch.no_grad():
-            released_samples_train_data = self._compute_released_set(train_data)
-            released_samples_test_data = self._compute_released_set(test_data)
+            released_samples_train_data = self.privatize(train_data)
+            released_samples_test_data = self.privatize(test_data)
 
         metric_results_train = compute_released_data_metrics(released_samples_train_data, train_data, self.metrics)
         metric_results_test = compute_released_data_metrics(released_samples_test_data, test_data, self.metrics)
@@ -235,7 +235,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         def get_one_hot_encoded_input(self, w):
             """
-                Transform our 2D w to a one-hot encoded alternative:
+                Transform ourdata 2D w to a one-hot encoded alternative:
 
                 W ->(x==0,x==1,y==0,y==1)
                 (0,0) -> (1, 0, 1, 0)
@@ -283,8 +283,8 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         - `adversary_criterion`: Identifies how to compute the loss of the adversary netwowrk.
         """
         super().__init__(device, privacy_size=1, public_size=1, metrics=[
-            PartialBivariateBinaryMutualInformation('E[MI_ZX]', 0),
-            PartialBivariateBinaryMutualInformation('E[MI_ZY]', 1),
+            PartialBivariateBinaryMutualInformation('E[I(X;Z)]', 0),
+            PartialBivariateBinaryMutualInformation('E[I(Y;z)]', 1),
             ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
         ], lr=lr)
 
@@ -342,7 +342,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         """
         raise NotImplementedError("Load function not yet implemented")
 
-    def _compute_released_set(self, data):
+    def privatize(self, data):
         released_data = self.privatizer(data)
         random_uniform_tensor = torch.rand(released_data.size())
         return torch.ceil(released_data - random_uniform_tensor).to(torch.int).view(-1, 1)
@@ -503,8 +503,8 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         by this parameter.
         """
         super().__init__(device, privacy_size, public_size, metrics=[
-            PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),
-            PartialMultivariateGaussianMutualInformation('E[MI_YZ]', range(privacy_size, privacy_size + public_size)),
+            PartialMultivariateGaussianMutualInformation('E[I(X;Z)]', range(0, privacy_size)),
+            PartialMultivariateGaussianMutualInformation('E[I(Y;Z)]', range(privacy_size, privacy_size + public_size)),
             ComputeDistortion('E[mse(z,y)]', range(privacy_size, privacy_size + public_size)).set_distortion_function(elementwise_mse)
         ], lr=lr)
         self.no_hidden_units_per_layer = no_hidden_units_per_layer
@@ -566,7 +566,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
             # print(m.weight)
             torch.nn.init.normal_(m.weight, 0.0, 1)
 
-    def _compute_released_set(self, data):
+    def privatize(self, data):
         released_set = self.privatizer(data)
         return released_set
 
