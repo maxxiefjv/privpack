@@ -2,8 +2,9 @@
 Utility module containing the most used utilities in this library.
 """
 from typing import List
-from .data_generator import DataGenerator
-from .metrics import (
+
+from privpack.utils.data_generator import DataGenerator
+from privpack.utils.metrics import (
     PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation, ComputeDistortion, Metric
 )
 

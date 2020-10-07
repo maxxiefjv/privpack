@@ -16,7 +16,7 @@ How to use this module
 2. Define a instance .... TODO
 
 """
-from collections.abc import Callable
+from typing import Callable
 import math
 import abc
 import torch
