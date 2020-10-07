@@ -1,7 +1,7 @@
-privpack.losses module
+privpack.core.losses module
 =============================
 
-.. automodule:: privpack.losses
+.. automodule:: privpack.core.losses
    :members:
    :undoc-members:
    :show-inheritance:

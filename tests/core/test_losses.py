@@ -3,7 +3,7 @@ import torch
 import math
 import pytest
 
-from privpack.losses import PrivacyLoss, UtilityLoss
+from privpack.core.losses import PrivacyLoss, UtilityLoss
 
 @pytest.fixture
 def mock_x_likelihoods():

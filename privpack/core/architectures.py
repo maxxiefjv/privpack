@@ -97,7 +97,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         pass
 
     def _get_metric_results(self, train_data, test_data):
-        if len(self.network_statistic_functions) == 0:
+        if len(self.metrics) == 0:
             return {}
 
         with torch.no_grad():

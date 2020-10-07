@@ -1,6 +1,6 @@
 from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
-from privpack.losses import PrivacyLoss, UtilityLoss
+from privpack.core.losses import PrivacyLoss, UtilityLoss
 from privpack.utils import DataGenerator
 from privpack.utils.metrics import MultivariateGaussianMutualInformation
 

@@ -11,8 +11,7 @@ Privpack API Documentation
 .. toctree::
    :maxdepth: 2
 
-   api/architectures
-   api/losses
+   api/privpack.core
    api/privpack.utils
 
 Indices and tables
