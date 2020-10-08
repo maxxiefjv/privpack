@@ -3,7 +3,8 @@ import torch
 import math
 import pytest
 
-from privpack.core.losses import PrivacyLoss, UtilityLoss
+from privpack.core.criterion import DiscreteMutualInformation ,BinaryHammingDistance, BinaryMutualInformation, MeanSquaredError, GaussianMutualInformation
+from privpack.core.criterion import PGANCriterion
 
 @pytest.fixture
 def mock_x_likelihoods():
@@ -30,8 +31,8 @@ def test_binary_mi_and_hamming(mock_release_probabilities, mock_x_likelihoods, m
         0.9 * math.log2(0.5) + 0.1 * math.log2(0.9) + 0.9 ** 2
     ])
 
-    binary_mi_loss_out = PrivacyLoss().binary_mi_loss(mock_release_probabilities, mock_x_likelihoods)
-    binary_hamming_loss_out = UtilityLoss(lambd, delta_constraint).expected_binary_hamming_distance(mock_release_probabilities, mock_public_values)
+    binary_mi_loss_out = BinaryMutualInformation()(mock_release_probabilities, mock_x_likelihoods)
+    binary_hamming_loss_out = BinaryHammingDistance(lambd, delta_constraint)(mock_release_probabilities, mock_public_values)
     actual_out = binary_mi_loss_out + binary_hamming_loss_out
 
     assert torch.all(torch.isclose(actual_out, expected_out))
@@ -45,7 +46,7 @@ def test_discrete_mutual_information(mock_release_probabilities, mock_x_likeliho
         0.9 * math.log2(0.5) + 0.1 * math.log2(0.9)
     ])
 
-    actual_out = PrivacyLoss().discrete_mi_loss(mock_release_probabilities_all, mock_x_likelihoods)
+    actual_out = DiscreteMutualInformation()(mock_release_probabilities_all, mock_x_likelihoods)
 
     assert torch.all(torch.isclose(actual_out, expected_out))
 
@@ -58,18 +59,16 @@ def test_binary_mutual_information(mock_release_probabilities, mock_x_likelihood
         0.9 * math.log2(0.5) + 0.1 * math.log2(0.9)
     ])
 
-    actual_out = PrivacyLoss().binary_mi_loss(mock_release_probabilities, mock_x_likelihoods)
+    actual_out = BinaryMutualInformation()(mock_release_probabilities, mock_x_likelihoods)
     assert torch.all(torch.isclose(actual_out, expected_out))
 
 def test_negative_binary_mutual_information(mock_release_probabilities, mock_x_likelihoods):
     mock_release_all_probabilities = torch.cat((1 - mock_release_probabilities, mock_release_probabilities), dim=1)
     expected_out = torch.mul(mock_release_all_probabilities, -torch.log2(mock_x_likelihoods)).sum(dim=1)
 
-    actual_out = - PrivacyLoss().binary_mi_loss(mock_release_probabilities, mock_x_likelihoods)
+    actual_out = - BinaryMutualInformation()(mock_release_probabilities, mock_x_likelihoods)
     assert torch.all(torch.isclose(actual_out, expected_out))
-
-def test_discrete_hamming_distance(mock_release_probabilities, mock_public_values):
-    (lambd, delta_constraint) = (1, 0)
+privacy_criterions) = (1, 0)
 
     expected_out = torch.Tensor([
         0.4 ** 2,
@@ -77,7 +76,7 @@ def test_discrete_hamming_distance(mock_release_probabilities, mock_public_value
         0.9 ** 2
     ])
 
-    actual_out = UtilityLoss(lambd, delta_constraint).expected_binary_hamming_distance(mock_release_probabilities, mock_public_values)
+    actual_out = BinaryHammingDistance(lambd, delta_constraint)(mock_release_probabilities, mock_public_values)
     assert torch.all(torch.isclose(actual_out, expected_out))
 
 def test_gauss_mean_squared_error_loss():
@@ -98,7 +97,7 @@ def test_gauss_mean_squared_error_loss():
         [0.3],
     ])
 
-    actual_out = UtilityLoss(lambd, delta_constraint).expected_mean_squared_error(mock_released_samples, mock_expected_samples)
+    actual_out = MeanSquaredError(lambd, delta_constraint)(mock_released_samples, mock_expected_samples)
 
     expected_out = torch.Tensor([
         ((0.25 - 0.3) ** 2) ** 2,
@@ -108,4 +107,22 @@ def test_gauss_mean_squared_error_loss():
     ])
 
     print(expected_out, actual_out)
+    assert torch.all(torch.isclose(actual_out, expected_out))
+
+
+def test_gan_criterion(mock_release_probabilities, mock_x_likelihoods, mock_public_values):
+    (lambd, delta_constraint) = (1, 0)
+
+    expected_out = torch.Tensor([
+        0.4 * math.log2(0.7) + 0.6 * math.log2(0.6) + 0.4 ** 2,
+        0.7 * math.log2(0.8) + 0.3 * math.log2(0.1) + 0.3 ** 2,
+        0.9 * math.log2(0.5) + 0.1 * math.log2(0.9) + 0.9 ** 2
+    ])
+
+    binary_gan_criterion = PGANCriterion()
+    binary_gan_criterion.add_privacy_criterion(BinaryMutualInformation())
+    binary_gan_criterion.add_privacy_criterion(BinaryHammingDistance(lambd, delta_constraint))
+
+    actual_out = binary_gan_criterion.privacy_loss(mock_release_probabilities, mock_x_likelihoods, mock_public_values)
+
     assert torch.all(torch.isclose(actual_out, expected_out))

@@ -10,11 +10,28 @@ This module defines the following classes:
 """
 
 import torch
+import abc
 
 from privpack.utils import hamming_distance, elementwise_mse
 
-class Loss():
+__all__ = [
+    'PrivacyCriterion',
+    'DiscreteMutualInformation',
+    'BinaryMutualInformation',
+    'NegativeBinaryMutualInformation',
+    'GaussianMutualInformation',
+    'UtilityCriterion',
+    'BinaryHammingDistance',
+    'MeanSquaredError',
+    'PGANCriterion'
+]
+
+class Criterion(abc.ABC):
     def __init__(self):
+        pass
+
+    @abc.abstractclassmethod
+    def __call__(self, actual, expected):
         pass
 
     def _expected_loss(self, release_probabilities, losses):
@@ -28,9 +45,42 @@ class Loss():
         """
         return torch.mul(release_probabilities, losses).sum(dim=1)
 
-class PrivacyLoss(Loss):
+class PGANCriterion():
+
+    def __init__(self):
+        self.privacy_criterions = []
+        self.adversary_criterions = []
+
+    def add_privacy_criterion(self, criterion: Criterion):
+        self.privacy_criterions.append(criterion)
+        return self
+
+    def add_adversary_criterion(self, criterion: Criterion):
+        self.adversary_criterions.append(criterion)
+        return self
+
+    def _compute_loss(self, relaeses, actual_private_values, actual_public_values, criterions):
+        total_loss = 0
+
+        for criterion in criterions:
+            if isinstance(criterion, PrivacyCriterion):
+                total_loss += criterion(relaeses, actual_private_values)
+            elif isinstance(criterion, UtilityCriterion):
+                total_loss += criterion(relaeses, actual_public_values)
+            else:
+                raise NotImplementedError("Unhandled Criterion type.")
+
+        return total_loss
+
+    def privacy_loss(self, releases, actual_private_values, actual_public_values):
+        return self._compute_loss(releases, actual_private_values, actual_public_values, self.privacy_criterions)
+
+    def adversary_loss(self, releases, actual_private_values, actual_public_values):
+        return self._compute_loss(releases, actual_private_values, actual_public_values, self.adversary_criterions)
+
+class PrivacyCriterion(Criterion):
     """
-    Privacy Loss is a component including loss function correlated to Information Theoretic Losses.
+    Privacy Criterion is a component including loss functions correlated to Information Theoretic Losses.
 
     Using these loss function optimum can be achieved for:
 
@@ -41,6 +91,15 @@ class PrivacyLoss(Loss):
 
     def __init__(self):
         pass
+
+    @abc.abstractclassmethod
+    def __call__(self, releases, likelihood_x) -> torch.Tensor:
+        pass
+
+class DiscreteMutualInformation(PrivacyCriterion):
+
+    def __call__(self, releases, likelihood_x):
+        return self.discrete_mi_loss(releases, likelihood_x)
 
     def discrete_mi_loss(self, release_all_probabilities, likelihood_x):
         """
@@ -55,12 +114,26 @@ class PrivacyLoss(Loss):
         """
         return super()._expected_loss(release_all_probabilities, torch.log2(likelihood_x))
 
+class BinaryMutualInformation(DiscreteMutualInformation):
+
+    def __call__(self, releases, likelihood_x):
+        return self.binary_mi_loss(releases, likelihood_x)
+
     def binary_mi_loss(self, release_probabilities, likelihood_x):
         """
         Function limited to computing the log-loss for binary cases, using discrete_mutual_information_loss.
         """
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
-        return self.discrete_mi_loss(release_all_probabilities, likelihood_x)
+        return super().discrete_mi_loss(release_all_probabilities, likelihood_x)
+
+class NegativeBinaryMutualInformation(BinaryMutualInformation):
+        def __call__(self, releases, actual_private_values):
+            return -1 * super().__call__(releases, actual_private_values)
+
+class GaussianMutualInformation(Criterion):
+
+    def __call__(self, releases, likelihood_x):
+        return self.gaussian_mutual_information_loss(releases, likelihood_x)
 
     def gaussian_mutual_information_loss(self, releases, log_likelihoods):
         k = releases.size(0)
@@ -68,7 +141,7 @@ class PrivacyLoss(Loss):
         return super()._expected_loss(probabilities, log_likelihoods)
 
 
-class UtilityLoss(Loss):
+class UtilityCriterion(Criterion):
     """
     Utitlity loss concerns itself with loss function related to utility/distortion (or disutility). Each
     utility loss is computed according to the formula:
@@ -84,11 +157,20 @@ class UtilityLoss(Loss):
         self.lambd = lambd
         self.delta_constraint = delta_constraint
 
+    @abc.abstractclassmethod
+    def __call__(self, releases, likelihood_x):
+        pass
+
     def _expected_loss(self, release_all_probabilities, losses):
         expected_distortion = super()._expected_loss(release_all_probabilities, losses)
         return self.lambd * torch.max(torch.zeros_like(expected_distortion),
                                       (expected_distortion - self.delta_constraint)) ** 2
 
+class BinaryHammingDistance(UtilityCriterion):
+
+    def __call__(self, releases, likelihood_x):
+        return self.expected_binary_hamming_distance(releases, likelihood_x)
+    
     def expected_binary_hamming_distance(self, release_probabilities, expected):
         """
         Compute the hamming distance for both possible binary values.
@@ -105,7 +187,12 @@ class UtilityLoss(Loss):
 
         hamming_distances = torch.cat((hamming_distance_zeros, hamming_distance_ones), dim=1)
 
-        return self._expected_loss(release_all_probabilities, hamming_distances)
+        return super()._expected_loss(release_all_probabilities, hamming_distances)
+
+class MeanSquaredError(UtilityCriterion):
+    
+    def __call__(self, releases, likelihood_x):
+        return self.expected_mean_squared_error(releases, likelihood_x)
 
     def expected_mean_squared_error(self, releases, expected):
         """
@@ -125,4 +212,4 @@ class UtilityLoss(Loss):
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(summed_mse.size(0)).view(summed_mse.size())
 
-        return self._expected_loss(probabilities, summed_mse)
+        return super()._expected_loss(probabilities, summed_mse)
