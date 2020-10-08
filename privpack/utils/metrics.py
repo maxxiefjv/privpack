@@ -138,8 +138,7 @@ class MultivariateGaussianMutualInformation(Metric):
         release_no_cols = numpy_release.shape[1]
         data_no_cols = numpy_data.shape[1]
 
-        return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.random.uniform(0, 1e-3,
-                                                               size=release_no_cols + data_no_cols))
+        return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.full((release_no_cols + data_no_cols), 1e-3))
 
     def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         """
