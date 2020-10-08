@@ -3,7 +3,7 @@ import torch
 import math
 import pytest
 
-from privpack.core.criterion import DiscreteMutualInformation ,BinaryHammingDistance, BinaryMutualInformation, MeanSquaredError, GaussianMutualInformation
+from privpack.core.criterion import DiscreteMutualInformation, BinaryHammingDistance, NegativeBinaryMutualInformation, BinaryMutualInformation, MeanSquaredError, GaussianMutualInformation
 from privpack.core.criterion import PGANCriterion
 
 @pytest.fixture
@@ -68,7 +68,9 @@ def test_negative_binary_mutual_information(mock_release_probabilities, mock_x_l
 
     actual_out = - BinaryMutualInformation()(mock_release_probabilities, mock_x_likelihoods)
     assert torch.all(torch.isclose(actual_out, expected_out))
-privacy_criterions) = (1, 0)
+
+def test_discrete_hamming_distance(mock_release_probabilities, mock_public_values):
+    (lambd, delta_constraint) = (1, 0)
 
     expected_out = torch.Tensor([
         0.4 ** 2,
@@ -109,7 +111,6 @@ def test_gauss_mean_squared_error_loss():
     print(expected_out, actual_out)
     assert torch.all(torch.isclose(actual_out, expected_out))
 
-
 def test_gan_criterion(mock_release_probabilities, mock_x_likelihoods, mock_public_values):
     (lambd, delta_constraint) = (1, 0)
 
@@ -122,6 +123,8 @@ def test_gan_criterion(mock_release_probabilities, mock_x_likelihoods, mock_publ
     binary_gan_criterion = PGANCriterion()
     binary_gan_criterion.add_privacy_criterion(BinaryMutualInformation())
     binary_gan_criterion.add_privacy_criterion(BinaryHammingDistance(lambd, delta_constraint))
+
+    binary_gan_criterion.add_adversary_criterion(NegativeBinaryMutualInformation())
 
     actual_out = binary_gan_criterion.privacy_loss(mock_release_probabilities, mock_x_likelihoods, mock_public_values)
 
