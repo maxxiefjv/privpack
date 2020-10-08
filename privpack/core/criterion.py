@@ -130,7 +130,7 @@ class NegativeBinaryMutualInformation(BinaryMutualInformation):
         def __call__(self, releases, actual_private_values):
             return -1 * super().__call__(releases, actual_private_values)
 
-class GaussianMutualInformation(Criterion):
+class GaussianMutualInformation(PrivacyCriterion):
 
     def __call__(self, releases, likelihood_x):
         return self.gaussian_mutual_information_loss(releases, likelihood_x)
@@ -140,6 +140,9 @@ class GaussianMutualInformation(Criterion):
         probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
         return super()._expected_loss(probabilities, log_likelihoods)
 
+class NegativeGaussianMutualInformation(GaussianMutualInformation):
+        def __call__(self, releases, actual_private_values):
+            return -1 * super().__call__(releases, actual_private_values)
 
 class UtilityCriterion(Criterion):
     """
