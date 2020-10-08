@@ -127,7 +127,8 @@ class MultivariateGaussianMutualInformation(Metric):
         Consequently return the schur complement of the A block: D - C * pinv(A) * B
         """
         (A, B, C, D) = self._prepare_schur_complement(cov_table, released_data_size)
-        return (D - C * torch.pinverse(A) * B) + np.diag(np.random.uniform(0, 1e-3, size=released_data_size))
+        assert torch.equal(C.T, B)
+        return (D - C * torch.pinverse(A) * C.T)
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
         """
