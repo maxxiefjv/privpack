@@ -9,7 +9,7 @@ import pytest
 @pytest.fixture
 def get_random_covariance_matrix():
     def _create_random_covariance_matrix(n):
-        return np.power(np.diag(np.random.normal(size=(n))), 2) * 5
+        return np.power(np.diag(np.random.normal(size=(n))), 2)
         # A = np.diag(np.random.normal(size=(n)))
         # return A * A.T
 
