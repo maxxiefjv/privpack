@@ -147,7 +147,6 @@ def test_gaussian_get_expected_x_likelihoods():
 def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
-@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
 def test_gaussian_release_output_schur_complement(fixed_train_data):
     (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
     gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
@@ -165,14 +164,13 @@ def test_gaussian_release_output_schur_complement(fixed_train_data):
     assert schur_complement.size() == torch.Size([5, 5])
     assert torch.det(schur_complement) > 0
 
-@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
 def test_gaussian_release_output_schur_100_times(fixed_train_data):
     (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
     gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
                          no_hidden_units_per_layer=5, noise_size=1)
 
-    for i in range(10):
+    for i in range(100):
         gauss_gan.reset()
         released_data = gauss_gan.privatizer(torch.Tensor(fixed_train_data)).detach()
 
@@ -184,6 +182,7 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
 
         assert schur_complement.size() == torch.Size([5, 5])
         assert torch.det(schur_complement) > 0
+        # assert np.isclose(torch.det(schur_complement).item(),0, atol=1e-1) or torch.det(schur_complement) > 0
 
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():
