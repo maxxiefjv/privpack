@@ -59,14 +59,14 @@ class PGANCriterion():
         self.adversary_criterions.append(criterion)
         return self
 
-    def _compute_loss(self, relaeses, actual_private_values, actual_public_values, criterions):
+    def _compute_loss(self, releases, actual_private_values, actual_public_values, criterions):
         total_loss = 0
 
         for criterion in criterions:
             if isinstance(criterion, PrivacyCriterion):
-                total_loss += criterion(relaeses, actual_private_values)
+                total_loss += criterion(releases, actual_private_values)
             elif isinstance(criterion, UtilityCriterion):
-                total_loss += criterion(relaeses, actual_public_values)
+                total_loss += criterion(releases, actual_public_values)
             else:
                 raise NotImplementedError("Unhandled Criterion type.")
 
