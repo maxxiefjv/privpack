@@ -1,5 +1,5 @@
-from gaussian_runner import GaussianNetworkRunner, get_gaussian_data
-from binary_runner import BinaryNetworkRunner, get_binary_data
+from runners import GaussianNetworkRunner, get_gaussian_data
+from runners import BinaryNetworkRunner, get_binary_data
 
 import argparse
 
@@ -8,15 +8,32 @@ def run_gaussian(args):
     (epochs, batch_size, lambd, delta, k) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
     (train_data, test_data) = get_gaussian_data(privacy_size, public_size, print_metrics=True)
     
-    GaussianNetworkRunner.run(train_data, test_data, privacy_size, public_size, hidden_layers_width, release_size, 
-                              epochs, batch_size, lambd, delta, k)
+    results = {}
+    for l in lambd:
+        for d in delta:
+            for no_samples in k:
+                runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, l, d)
+                metric_results = runner.run(train_data, test_data, epochs, batch_size, no_samples)
+                results.setdefault(l, {}).setdefault(d, metric_results)
+
+    print(json.dumps(results, sort_keys=True, indent=4))
+
 
 def run_binary(args):
     (privacy_size, public_size, release_size) = (1, 1, 1)
     (epochs, batch_size, lambd, delta) = (args.epochs, args.batchsize, args.lambd, args.delta)
     (train_data, test_data) = get_binary_data(privacy_size, public_size, print_metrics=True)
     
-    BinaryNetworkRunner.run(train_data, test_data, release_size, epochs, batch_size, lambd, delta)
+    results = {}
+    for l in lambd:
+        for d in delta:
+            runner = BinaryNetworkRunner(l, d)
+            metric_results = runner.run(train_data, test_data, epochs, batch_size)
+            results.setdefault(l, {}).setdefault(d, metric_results)
+
+    print(json.dumps(results, sort_keys=True, indent=4))
+
+
 
 network_arg_switcher = {
     'binary': run_binary,
