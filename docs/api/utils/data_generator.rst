@@ -1,4 +1,4 @@
-privpack.utils.DataGenerator module
+privpack.utils.data_generator module
 ====================================
 
 .. automodule:: privpack.utils.data_generator

@@ -1,6 +1,9 @@
 from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
-from privpack.core.losses import PrivacyLoss, UtilityLoss
+
+from privpack.core.criterion import NegativeBinaryMutualInformation, BinaryMutualInformation, BinaryHammingDistance, GaussianMutualInformation, MeanSquaredError
+from privpack.core.criterion import PGANCriterion
+
 from privpack.utils import DataGenerator
 from privpack.utils.metrics import MultivariateGaussianMutualInformation
 
@@ -71,34 +74,23 @@ def test_binary_mi_gan_x_likelihoods(lambda_and_delta, batch_size, uncorrelated_
     (lambd, delta_constraint) = lambda_and_delta
     (train_data, test_data) = uncorrelated_train_and_test_data
 
-    binary_gan = BinaryGAN(torch.device('cpu'), None, None)
+    binary_gan = BinaryGAN(torch.device('cpu'), PGANCriterion())
     mock_x_likelihoods = binary_gan._get_likelihoods(train_data[:batch_size, 0])
     assert mock_x_likelihoods.size() == torch.Size([batch_size, 2])
 
 
 def test_binary_mi_gan(epochs, lambda_and_delta, uncorrelated_train_and_test_data):
-    def create_privatizer_criterion(lambd, delta_constraint):
-        def privatizer_criterion(release_probabilities, likelihood_x, actual_public):
-            assert release_probabilities.requires_grad
-            assert not likelihood_x.requires_grad
-
-            privacy_loss = PrivacyLoss().binary_mi_loss(release_probabilities, likelihood_x)
-            utility_loss = UtilityLoss(lambd, delta_constraint).expected_binary_hamming_distance(release_probabilities, actual_public)
-
-            return privacy_loss + utility_loss
-
-        return privatizer_criterion
-
-    def adversary_criterion(release_probabilities, likelihood_x, actual_public):
-        assert not release_probabilities.requires_grad
-        assert likelihood_x.requires_grad
-        return -1 * PrivacyLoss().binary_mi_loss(release_probabilities, likelihood_x)
-
     (lambd, delta_constraint) = lambda_and_delta
     (train_data, test_data) = uncorrelated_train_and_test_data
-    privatizer_criterion = create_privatizer_criterion(lambd, delta_constraint)
 
-    binary_gan = BinaryGAN(torch.device('cpu'), privatizer_criterion, adversary_criterion)
+    binary_gan_criterion = PGANCriterion()
+
+    binary_gan_criterion.add_privacy_criterion(BinaryMutualInformation())
+    binary_gan_criterion.add_privacy_criterion(BinaryHammingDistance(lambd, delta_constraint))
+
+    binary_gan_criterion.add_adversary_criterion(NegativeBinaryMutualInformation())
+
+    binary_gan = BinaryGAN(torch.device('cpu'), binary_gan_criterion)
     binary_gan.train(train_data, test_data, epochs)
 
 def test_gaussian_get_x_likelihoods():
@@ -118,7 +110,7 @@ def test_gaussian_get_x_likelihoods():
 
     (privacy_size, public_size, release_size, noise_size) = (1, 1, 1, 1)
 
-    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None, no_hidden_units_per_layer=5, noise_size=1)
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, PGANCriterion(), no_hidden_units_per_layer=5, noise_size=1)
     x_likelihoods = gauss_gan._get_log_likelihoods(mock_releases, mock_x_batch)
     assert x_likelihoods.size() == torch.Size([mock_x_batch.size(0), 1])
 
@@ -139,7 +131,7 @@ def test_gaussian_get_expected_x_likelihoods():
 
     (privacy_size, public_size, release_size, noise_size) = (1, 1, 1, 1)
 
-    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, PGANCriterion(),
                          no_hidden_units_per_layer=5, noise_size=1)
     x_likelihoods = gauss_gan._get_expected_log_likelihoods(mock_released_samples, mock_x_batch)
     assert x_likelihoods.size() == torch.Size([mock_x_batch.size(0), 1])
@@ -147,10 +139,9 @@ def test_gaussian_get_expected_x_likelihoods():
 def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
-@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
 def test_gaussian_release_output_schur_complement(fixed_train_data):
     (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
-    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, PGANCriterion(),
                          no_hidden_units_per_layer=5, noise_size=1)
 
     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
@@ -165,14 +156,14 @@ def test_gaussian_release_output_schur_complement(fixed_train_data):
     assert schur_complement.size() == torch.Size([5, 5])
     assert torch.det(schur_complement) > 0
 
-@pytest.mark.skip(reason="Test is currently failing. Implementation should be solved.")
+@pytest.mark.skip(reason="Currently not passing. Clarifying test results overview by passing test until fix is ready.")
 def test_gaussian_release_output_schur_100_times(fixed_train_data):
     (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
-    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, None, None,
+    gauss_gan = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, PGANCriterion(),
                          no_hidden_units_per_layer=5, noise_size=1)
 
-    for i in range(10):
+    for i in range(100):
         gauss_gan.reset()
         released_data = gauss_gan.privatizer(torch.Tensor(fixed_train_data)).detach()
 
@@ -184,6 +175,7 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
 
         assert schur_complement.size() == torch.Size([5, 5])
         assert torch.det(schur_complement) > 0
+        # assert np.isclose(torch.det(schur_complement).item(),0, atol=1e-1) or torch.det(schur_complement) > 0
 
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():

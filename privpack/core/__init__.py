@@ -1,1 +1,1 @@
-import privpack.core.losses
+import privpack.core.criterion

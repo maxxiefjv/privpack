@@ -16,7 +16,8 @@ How to use this module
 2. Define a instance .... TODO
 
 """
-from typing import Callable
+from typing import Callable, List
+
 import math
 import abc
 import torch
@@ -126,7 +127,8 @@ class MultivariateGaussianMutualInformation(Metric):
         Consequently return the schur complement of the A block: D - C * pinv(A) * B
         """
         (A, B, C, D) = self._prepare_schur_complement(cov_table, released_data_size)
-        return (D - C * torch.pinverse(A) * B) + np.diag(np.random.uniform(0, 1e-3, size=released_data_size))
+        assert torch.equal(C.T, B)
+        return (D - C * torch.pinverse(A) * C.T)
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
         """
@@ -136,8 +138,7 @@ class MultivariateGaussianMutualInformation(Metric):
         release_no_cols = numpy_release.shape[1]
         data_no_cols = numpy_data.shape[1]
 
-        return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.random.uniform(0, 1e-3,
-                                                               size=release_no_cols + data_no_cols))
+        return np.cov(numpy_data.T, numpy_release.T) + np.diag(np.full((release_no_cols + data_no_cols), 1e-3))
 
     def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         """
@@ -154,7 +155,7 @@ class MultivariateGaussianMutualInformation(Metric):
 
 class PartialMultivariateGaussianMutualInformation(MultivariateGaussianMutualInformation):
 
-    def __init__(self, name: str, dimensions: int):
+    def __init__(self, name: str, dimensions: List[int]):
         super().__init__(name)
         self.dimensions = dimensions
 
@@ -162,7 +163,7 @@ class PartialMultivariateGaussianMutualInformation(MultivariateGaussianMutualInf
         return super().__call__(released_data, data[:, self.dimensions])
 
 class ComputeDistortion(Metric):
-    def __init__(self, name: str, dimensions: int):
+    def __init__(self, name: str, dimensions: List[int]):
         super().__init__(name)
         self.dimensions = dimensions
 
