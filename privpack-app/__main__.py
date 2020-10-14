@@ -112,7 +112,7 @@ ap.add_argument('-l', '--lambd', help="Define the lambda to use in the loss func
                                   default=[500])
 
 ap.add_argument('-d', '--delta', help="Define the delta to use in the loss function. Train a network instance per value specified.",
-                                 type=int,
+                                 type=float,
                                  nargs='*',
                                  default=[0.5])
 
