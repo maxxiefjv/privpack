@@ -63,9 +63,9 @@ class PGANCriterion():
         total_loss = 0
 
         for criterion in criterions:
-            if isinstance(criterion, PrivacyCriterion):
+            if issubclass(type(criterion), PrivacyCriterion):
                 total_loss += criterion(releases, actual_private_values)
-            elif isinstance(criterion, UtilityCriterion):
+            elif issubclass(type(criterion), UtilityCriterion):
                 total_loss += criterion(releases, actual_public_values)
             else:
                 raise NotImplementedError("Unhandled Criterion type.")
