@@ -22,7 +22,8 @@ setuptools.setup(
     install_requires=[
         'torch',
         'numpy',
-        'scipy'
+        'scipy',
+        'sklearn'
     ],
     extras_require={
         'dev': [
