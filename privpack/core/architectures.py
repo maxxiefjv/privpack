@@ -60,6 +60,9 @@ class GenerativeAdversarialNetwork(abc.ABC):
         self._privatizer_criterion = gan_criterion.privacy_loss
         self._adversary_criterion = gan_criterion.adversary_loss
 
+    def __call__(self, data):
+        return self.privatize(data)
+
     def set_device(self, device):
         """
         Change the device used by this network.
@@ -73,6 +76,13 @@ class GenerativeAdversarialNetwork(abc.ABC):
     def get_device(self):
         """Get the device this network is currently using."""
         return self.device
+
+    @abc.abstractclassmethod
+    def reset(self):
+        """
+        Reset the parameters of both networks. 
+        """
+        pass
 
     @abc.abstractmethod
     def _update_adversary(self, entry, x_batch, y_batch):
@@ -289,7 +299,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         """
         super().__init__(device, privacy_size=1, public_size=1, gan_criterion=binary_gan_criterion, metrics=[
             PartialBivariateBinaryMutualInformation('E[I(X;Z)]', 0),
-            PartialBivariateBinaryMutualInformation('E[I(Y;z)]', 1),
+            PartialBivariateBinaryMutualInformation('E[I(Y;Z)]', 1),
             ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
         ], lr=lr)
 
