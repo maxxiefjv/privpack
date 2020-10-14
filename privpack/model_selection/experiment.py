@@ -1,3 +1,8 @@
+"""
+This module defines how experiments are conducted. What is expected from your network
+and how many train/validation splits should be trained and tested.
+"""
+
 from typing import List, Callable
 
 from privpack.utils.metrics import Metric
@@ -7,7 +12,7 @@ from sklearn.model_selection import KFold
 import torch
 
 class Expectations:
-    
+
     class Expectation:
         def __init__(self, metric: Metric, value: float, relation: Callable[[float, float], bool] = lambda x,y: x == y):
             self.metric = metric
@@ -93,7 +98,6 @@ class Experiment:
             'test_average': test_average_metric_results,
         }
 
-
     def run(self, data, n_splits, epochs, batch_size, **kwargs):
         kf = KFold(n_splits=n_splits)
 
@@ -103,7 +107,7 @@ class Experiment:
 
             train_data = data[train_indices]
             test_data = data[test_indices]
-            
+
             self.network.train(train_data, test_data, epochs=epochs, batch_size=batch_size, **kwargs)
 
             train_expectations = self._compute_expecations(train_data)
@@ -118,5 +122,3 @@ class Experiment:
 
         runs_results['averages'] = self._average_metric_results(runs_results)
         return runs_results
-
-            

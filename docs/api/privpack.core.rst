@@ -5,7 +5,7 @@ privpack.core package
    :maxdepth: 2
 
    core/architectures
-   core/losses
+   core/criterion
 
 
 module contents

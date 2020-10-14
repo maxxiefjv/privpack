@@ -4,6 +4,7 @@ this module defines the following classes:
 
 - `GenerativeAdversarialNetwork`
 - `BinaryPrivacyPreservingAdversarialNetwork`
+- `GaussianPrivacyPreservingAdversarialNetwork`
 
 """
 

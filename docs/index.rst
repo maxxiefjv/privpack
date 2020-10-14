@@ -12,6 +12,7 @@ Privpack API Documentation
    :maxdepth: 2
 
    api/privpack.core
+   api/privpack.model_selection
    api/privpack.utils
 
 Indices and tables
