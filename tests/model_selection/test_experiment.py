@@ -9,7 +9,6 @@ from privpack.utils import DataGenerator
 
 import numpy as np
 import torch 
-import json
 
 def test_experiment(uncorrelated_train_and_test_data):
     (train_data, test_data) = uncorrelated_train_and_test_data
@@ -32,5 +31,4 @@ def test_experiment(uncorrelated_train_and_test_data):
     experiment = Experiment(network, expectations)
     runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size)
     
-    assert list(runs_results.keys()) == list(range(n_splits))
-    assert False
+    assert list(runs_results.keys()) == list(range(n_splits)) + ['averages']
