@@ -20,5 +20,5 @@ NOTE: python3 is currently required for this project.
 For testing purposes one should use the pytest library included in the development requirements of this package. Create your test in the corresponding test file and run the `$ pytest <path/to/test/file>` command in the root directory of this project.
 
 # Example program
-An example program is available called privpack-app. To run this program open your python environment and, in the root folder of this project run `$ python privpack-app -h`. This will show all the options available for running the example app. At this moment
+An example program is available called privpack-app. To run this program open your python environment and run `$ python privpack-app -h` in the root folder of this project. This will show all the options available for running the example app. At this moment
 two Privacy-Preserving networks have been implemented in the example program: Binary and Gaussian. 
