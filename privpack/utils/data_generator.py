@@ -84,15 +84,16 @@ class DataGenerator():
         data = np.random.uniform(0, 1, size=(amount))
         return torch.Tensor([(int(i / 2), i % 2) for i in np.digitize(data, acc_dist)])
 
-    def generate_gauss_mixture_data(mu, cov, seed=None):
+    def generate_gauss_mixture_data(mu, cov, seed=None, num_samples=10000, train_ratio=0.8):
         '''
         Returns pytorch tensor with @amount number of entries.
         '''
 
         np.random.seed(seed)
-        mixture_data = np.random.multivariate_normal(mu, cov, 10000)
-        gm_train_data = torch.Tensor(mixture_data[:8000])
-        gm_test_data = torch.Tensor(mixture_data[8000:])
+        mixture_data = np.random.multivariate_normal(mu, cov, num_samples)
+        num_train_samples = int(num_samples * train_ratio)
+        gm_train_data = torch.Tensor(mixture_data[:num_train_samples])
+        gm_test_data = torch.Tensor(mixture_data[num_train_samples:])
 
         return (gm_train_data, gm_test_data)
 
