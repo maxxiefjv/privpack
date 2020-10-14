@@ -43,7 +43,8 @@ class Experiment:
         self.expectations = expectations
 
     def _compute_expecations(self, data):
-        released_data = self.network(data)
+        with torch.no_grad():
+            released_data = self.network(data)
         results = {}
 
         for expectation in self.expectations:
