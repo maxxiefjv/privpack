@@ -38,3 +38,12 @@ def get_random_train_data():
         return DataGenerator.generate_gauss_mixture_data(mu, cov)[0]
 
     return _generate_random_train_data
+
+@pytest.fixture
+def uncorrelated_train_and_test_data():
+    (norm_dist, acc_dist) = DataGenerator.get_completely_uncorrelated_dist()
+    synthetic_data = DataGenerator.generate_binary_data(10, acc_dist)
+
+    train_data = torch.Tensor(synthetic_data[:5])
+    test_data = torch.Tensor(synthetic_data[5:])
+    return (train_data, test_data)
