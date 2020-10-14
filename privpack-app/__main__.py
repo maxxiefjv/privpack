@@ -33,8 +33,8 @@ def run_gaussian(args):
         return
 
     n_splits = 3
-    for l in lambd:
-        for d in delta:
+    for d in delta:
+        for l in lambd:
             for no_samples in k:
                 
                 network_criterion = PGANCriterion()
@@ -51,7 +51,7 @@ def run_gaussian(args):
 
                 experiment = Experiment(network, expectations)
                 runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size)
-                results.setdefault(l, {}).setdefault(d, runs_results['averages'])
+                results.setdefault(d, {}).setdefault(l, runs_results['averages'])
 
     print(json.dumps(results, sort_keys=True, indent=4))
 
@@ -71,9 +71,8 @@ def run_binary(args):
         return
     
     n_splits = 3
-    for l in lambd:
-        for d in delta:
-
+    for d in delta:
+        for l in lambd:
             network_criterion = PGANCriterion()
             network_criterion.add_privacy_criterion(BinaryHammingDistance(lambd=l, delta_constraint=d)).add_privacy_criterion(BinaryMutualInformation())
             network_criterion.add_adversary_criterion(NegativeBinaryMutualInformation())
@@ -87,7 +86,7 @@ def run_binary(args):
 
             experiment = Experiment(network, expectations)
             runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size)
-            results.setdefault(l, {}).setdefault(d, runs_results['averages'])
+            results.setdefault(d, {}).setdefault(l, runs_results['averages'])
 
     print(json.dumps(results, sort_keys=True, indent=4))
     
