@@ -59,6 +59,40 @@ class Experiment:
 
         return results
 
+    def _average_metric_results(self, results):
+        metric_names = [x.metric.name for x in self.expectations]
+
+        train_average_metric_results = {}
+        test_average_metric_results = {}
+
+        for i in results.keys():
+            train_resuls_i = results[i]['train']
+            test_results_i = results[i]['test']
+
+            for name in metric_names:
+                train_metric_results = train_resuls_i[name]
+                test_metric_results = test_results_i[name]
+
+                train_average_metric_results.setdefault(name, {})
+                train_average_metric_results[name]['satisfies'] = train_average_metric_results[name].setdefault('satisfies', True) and train_metric_results['satisfies']
+                train_average_metric_results[name]['expected_out'] = train_metric_results['expected_out']
+
+                train_average_metric_results[name].setdefault('actual_out', 0)
+                train_average_metric_results[name]['actual_out'] += train_metric_results['actual_out'] / len(results.keys())
+
+                test_average_metric_results.setdefault(name, {})
+                test_average_metric_results[name]['satisfies'] = test_average_metric_results[name].setdefault('satisfies', True) and test_metric_results['satisfies']
+                test_average_metric_results[name]['expected_out'] = test_metric_results['expected_out']
+
+                test_average_metric_results[name].setdefault('actual_out', 0)
+                test_average_metric_results[name]['actual_out'] += test_metric_results['actual_out'] / len(results.keys())
+
+        return {
+            'train_average': train_average_metric_results,
+            'test_average': test_average_metric_results,
+        }
+
+
     def run(self, data, n_splits, epochs, batch_size, **kwargs):
         kf = KFold(n_splits=n_splits)
 
@@ -81,6 +115,7 @@ class Experiment:
 
             runs_results[index] = total_expectations
 
+        runs_results['averages'] = self._average_metric_results(runs_results)
         return runs_results
 
             
