@@ -65,8 +65,8 @@ def run_binary(args):
     if len(lambd) == 1 and len(delta) == 1:
         runner = BinaryNetworkRunner(lambd[0], delta[0])
         metric_results = runner.run(train_data, test_data, epochs, batch_size)
-        results.setdefault(l, {}).setdefault(d, metric_results)
-        
+        results = metric_results
+        print("Trained results:")
         print(json.dumps(results, sort_keys=True, indent=4))
         return
     
@@ -89,6 +89,8 @@ def run_binary(args):
             results.setdefault(d, {}).setdefault(l, runs_results['averages'])
 
     print(json.dumps(results, sort_keys=True, indent=4))
+    if (args.output):
+        np.savetxt(results, str(args.output))
     
 
 network_arg_switcher = {
@@ -128,6 +130,10 @@ ap.add_argument('-b', '--batchsize', help="Define the number of samples used per
 ap.add_argument('-e', '--epochs', help="Define the number of epochs to run the training process.",
                                   type=int,
                                   default=500)
+
+ap.add_argument('-o', '--output', help="Store the results in a specified file. Default output is no output.",
+                                  type=str,
+                                  default=None)
 
 
 def main():

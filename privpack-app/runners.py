@@ -46,8 +46,8 @@ class PGANRunner():
             self.gan_network.train(train_data, test_data, epochs, batch_size=batch_size)
         
         with torch.no_grad():
-            released_train_data = gan_network.privatize(train_data)
-            released_test_data = gan_network.privatize(test_data)
+            released_train_data = self.gan_network.privatize(train_data)
+            released_test_data = self.gan_network.privatize(test_data)
 
         metric_results_train = compute_released_data_metrics(released_train_data, train_data, self.metrics)
         metric_results_test = compute_released_data_metrics(released_test_data, test_data, self.metrics)
@@ -76,7 +76,7 @@ class GaussianNetworkRunner(PGANRunner):
         )
 
     def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int) -> None:
-        super().run(train_data, test_data, epochs, batch_size, k)
+        return super().run(train_data, test_data, epochs, batch_size, k)
 
 class BinaryNetworkRunner(PGANRunner):
 
@@ -94,5 +94,5 @@ class BinaryNetworkRunner(PGANRunner):
         )
 
     def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int) -> None:
-        super().run(train_data, test_data, epochs, batch_size, None)
+        return super().run(train_data, test_data, epochs, batch_size, None)
         
