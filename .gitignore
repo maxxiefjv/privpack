@@ -145,3 +145,7 @@ dmypy.json
 
 ## Visual studio settings
 .vscode
+
+## PROJECT SPECIFIC
+privpack-app/Data
+privpack-app/bmi-predictor
