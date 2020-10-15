@@ -56,18 +56,22 @@ class PGANCriterion():
         self.adversary_criterions = []
 
     def __str__(self):
-        str_repr_privacy_crits = ""
-        str_repr_adversary_crits = ""
+        str_repr_privacy_crits = []
+        str_repr_adversary_crits = []
 
-        for criterion in criterions:
-            if issubclass(type(criterion), PrivacyCriterion):
-                str_repr_privacy_crits += str(criterion
-            elif issubclass(type(criterion), UtilityCriterion):
-                str_repr_adversary_crits += str(criterion)
-            else:
-                raise NotImplementedError("Unhandled Criterion type.")
+        for criterion in self.privacy_criterions:
+            str_repr_privacy_crits += str(criterion) + '\n'
 
-        return f"Privacy Criterion: {str_repr_privacy_crits} \n Adversary Criterion: {str_repr_adversary_crits} "
+        for criterion in self.adversary_criterions:
+            str_repr_adversary_crits += '\t' + str(criterion)
+
+        return f"Privacy Criterion: \n {str_repr_privacy_crits} \n Adversary Criterion: \n{str_repr_adversary_crits} "
+
+    def to_json_dict(self):
+        return {
+            'PrivacyCriterion' : [str(x) for x in self.privacy_criterions],
+            'AdversaryCriterion' : [str(x) for x in self.adversary_criterions],
+        }
 
     def add_privacy_criterion(self, criterion: Criterion):
         self.privacy_criterions.append(criterion)
@@ -111,7 +115,7 @@ class PrivacyCriterion(Criterion):
         pass
 
     def __str__(self):
-        return self.__name__
+        return str(type(self).__name__)
 
     @abc.abstractclassmethod
     def __call__(self, releases, likelihood_x) -> torch.Tensor:
@@ -182,7 +186,7 @@ class UtilityCriterion(Criterion):
         self.delta_constraint = delta_constraint
 
     def __str__(self):
-        return self.__name__ + '({}, {})'.format(self.lambd, self.delta_constraint)
+        return type(self).__name__ + '(lambda={}, delta={})'.format(self.lambd, self.delta_constraint)
 
     @abc.abstractclassmethod
     def __call__(self, releases, likelihood_x):

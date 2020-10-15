@@ -424,11 +424,11 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         return privatizer_loss
 
-    def train(self, train_data, test_data, epochs, batch_size=1, privatizer_train_every_n=5, adversary_train_every_n=1):
+    def train(self, train_data, test_data, epochs, batch_size=1, privatizer_train_every_n=5, adversary_train_every_n=1, verbose=False):
         return super().train(train_data, test_data, epochs, k=None,
                              batch_size=batch_size, data_sampler=None,
                              privatizer_train_every_n=privatizer_train_every_n,
-                             adversary_train_every_n=adversary_train_every_n)
+                             adversary_train_every_n=adversary_train_every_n, verbose=verbose)
 
 class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
     """
@@ -646,8 +646,8 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         return privatizer_loss
 
-    def train(self, train_data, test_data, epochs, k=1, batch_size=2, privatizer_train_every_n=5, adversary_train_every_n=1):
+    def train(self, train_data, test_data, epochs, k=1, batch_size=2, privatizer_train_every_n=5, adversary_train_every_n=1, verbose=False):
         return super().train(train_data, test_data, epochs, k=k,
                              batch_size=batch_size, data_sampler=sample_from_network,
                              privatizer_train_every_n=privatizer_train_every_n,
-                             adversary_train_every_n=adversary_train_every_n)
+                             adversary_train_every_n=adversary_train_every_n, verbose=verbose)

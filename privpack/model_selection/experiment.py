@@ -110,11 +110,11 @@ class Experiment:
             test_data = data[test_indices]
 
             if (verbose):
-                print(f"Training network with settings: {}".format(json.dumps({
+                print("Training network with settings: {}".format(json.dumps({
                     'epochs': epochs,
                     'batch_size': batch_size,
                     'n_splits': n_splits,
-                    'gan_criterion': self.network.gan_criterion 
+                    'gan_criterion': self.network.gan_criterion.to_json_dict()
                 }, indent=4)))
 
             self.network.train(train_data, test_data, epochs=epochs, batch_size=batch_size, verbose=verbose, **kwargs)
