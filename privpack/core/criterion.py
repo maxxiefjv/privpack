@@ -50,6 +50,9 @@ class Criterion(abc.ABC):
         return torch.mul(release_probabilities, losses).sum(dim=1)
 
 class PGANCriterion():
+    """
+    Create a criterion class 
+    """
 
     def __init__(self):
         self.privacy_criterions = []
