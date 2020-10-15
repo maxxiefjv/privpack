@@ -114,9 +114,6 @@ class MultivariateGaussianMutualInformation(Metric):
 
         return (A, B, C, D)
 
-    def is_pos_def(self, x):
-        return np.all(np.linalg.eigvals(x) > 0)
-
     def _compute_schur_complement(self, cov_table, released_data_size):
         """
         Get elements from cov_table such that:
@@ -128,7 +125,7 @@ class MultivariateGaussianMutualInformation(Metric):
         """
         (A, B, C, D) = self._prepare_schur_complement(cov_table, released_data_size)
         assert torch.equal(C.T, B)
-        return (D - C * torch.pinverse(A) * C.T)
+        return (D - torch.matmul(torch.matmul(C,torch.inverse(A)), C.T))
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
         """

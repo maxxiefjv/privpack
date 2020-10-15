@@ -156,7 +156,6 @@ def test_gaussian_release_output_schur_complement(fixed_train_data):
     assert schur_complement.size() == torch.Size([5, 5])
     assert torch.det(schur_complement) > 0
 
-@pytest.mark.skip(reason="Currently not passing. Clarifying test results overview by passing test until fix is ready.")
 def test_gaussian_release_output_schur_100_times(fixed_train_data):
     (privacy_size, public_size, release_size, noise_size) = (5, 5, 5, 5)
     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Z)')
@@ -169,6 +168,8 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
 
         XZ_cov = torch.Tensor(multivariate_gauss_statistic._get_positive_definite_covariance(released_data.numpy(),
                                                                                              fixed_train_data[:, :privacy_size]))
+
+        print(XZ_cov)
         print("Covariance Matrix is positive semi definite: {}".format(is_pos_def(XZ_cov)))
         schur_complement = multivariate_gauss_statistic._compute_schur_complement(XZ_cov, 5)
         print("Schur complement is positive semi definite: {}".format(is_pos_def(schur_complement)))
