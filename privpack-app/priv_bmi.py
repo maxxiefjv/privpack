@@ -8,14 +8,14 @@ class BMIExperiment(ExperimentRunner):
     def run(self, args):
         pass
         ## Figure out the input dimensions: W = (Y, X)
-        # Width * Height * Color = 224 * 224 * 3     +   BMI 
+        # Width * Height * Color = 224 * 224 * 3     +   ID 
         # Output: 
         # Width * Height * Color = 224 * 224 * 3
 
         # Adversary Input:
         # Privatizer out = Width * Height * Color = 224 * 224 * 3
         # Adversary output:
-        # Log Likelihood = scalar
+        # Log Likelihood = scalar: likelihood: correct identity.
 
 
         # (privacy_size, public_size, hidden_layers_width, release_size) = (5, 5, 20, 5)
@@ -33,3 +33,11 @@ class BMIExperiment(ExperimentRunner):
         # print(json.dumps(results, sort_keys=True, indent=4))
         # if (args.output):
         #     json.dump( results, open( args.output + '.json', 'w' ), indent=4 )
+
+
+
+        ## TODO
+        # BMI case uitwerken: Utility en Privacy Measures
+        # Implementeren non-parametric estimation MI (II)
+        # Test gaussian op NIET volledig onafhankelijke variabele. (I)
+        # Declareeer NaN als je gezond geval MI tegenkomt met parametrische schatting MI (III)
