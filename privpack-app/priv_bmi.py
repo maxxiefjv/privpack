@@ -33,11 +33,3 @@ class BMIExperiment(ExperimentRunner):
         # print(json.dumps(results, sort_keys=True, indent=4))
         # if (args.output):
         #     json.dump( results, open( args.output + '.json', 'w' ), indent=4 )
-
-
-
-        ## TODO
-        # BMI case uitwerken: Utility en Privacy Measures
-        # Implementeren non-parametric estimation MI (II)
-        # Test gaussian op NIET volledig onafhankelijke variabele. (I)
-        # Declareeer NaN als je gezond geval MI tegenkomt met parametrische schatting MI (III)
