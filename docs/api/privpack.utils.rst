@@ -8,9 +8,6 @@ privpack.utils package
    utils/metrics
 
 
-module contents
----------------
-
 .. automodule:: privpack.utils
    :members:
    :undoc-members:

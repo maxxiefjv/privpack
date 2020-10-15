@@ -7,9 +7,6 @@ privpack.model_selection package
    model_selection/experiment
 
 
-module contents
----------------
-
 .. automodule:: privpack.model_selection
    :members:
    :undoc-members:

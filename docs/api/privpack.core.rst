@@ -7,10 +7,6 @@ privpack.core package
    core/architectures
    core/criterion
 
-
-module contents
----------------
-
 .. automodule:: privpack.core
    :members:
    :undoc-members:
