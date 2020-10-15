@@ -302,7 +302,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         super().__init__(device, privacy_size=1, public_size=1, gan_criterion=binary_gan_criterion, metrics=[
             PartialBivariateBinaryMutualInformation('E[I(X;Z)]', 0),
             PartialBivariateBinaryMutualInformation('E[I(Y;Z)]', 1),
-            ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
+            ComputeDistortion('E[hamm(x,y)]', [1]).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
         ], lr=lr)
 
         self.n_noise = 0  # Size of the noise vector
