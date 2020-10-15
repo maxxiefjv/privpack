@@ -1,10 +1,12 @@
+from experiments import ExperimentRunner
+
 class BMIExperiment(ExperimentRunner):
 
     def __init__(self):
         pass
 
     def run(self, args):
-
+        pass
         ## Figure out the input dimensions: W = (Y, X)
         # Width * Height * Color = 224 * 224 * 3     +   BMI 
         # Output: 

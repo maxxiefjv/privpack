@@ -1,3 +1,6 @@
+from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
+from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
+
 from privpack.core.criterion import PGANCriterion
 from privpack.core.criterion import BinaryHammingDistance, BinaryMutualInformation, NegativeBinaryMutualInformation
 from privpack.core.criterion import MeanSquaredError, GaussianMutualInformation, NegativeGaussianMutualInformation
@@ -6,6 +9,9 @@ from privpack.model_selection.experiment import Experiment, Expectations
 from privpack.utils.metrics import PartialBivariateBinaryMutualInformation, PartialMultivariateGaussianMutualInformation, ComputeDistortion
 
 from privpack.utils import hamming_distance, elementwise_mse
+
+import torch
+import numpy as np
 
 class ExperimentRunner():
     def __init__(self):
