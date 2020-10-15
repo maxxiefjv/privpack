@@ -85,12 +85,12 @@ def run_binary(args):
             expectations.add_expectation(ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64)), 0.5, lambda x,y: x < y)
 
             experiment = Experiment(network, expectations)
-            runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size)
+            runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size, verbose=True)
             results.setdefault(d, {}).setdefault(l, runs_results['averages'])
 
     print(json.dumps(results, sort_keys=True, indent=4))
     if (args.output):
-        np.savetxt(results, str(args.output))
+        json.dump( results, open( args.output + '.json', 'w' ), indent=4 )
     
 
 network_arg_switcher = {
@@ -115,7 +115,7 @@ ap.add_argument('-l', '--lambd', help="Define the lambda to use in the loss func
 ap.add_argument('-d', '--delta', help="Define the delta to use in the loss function. Train a network instance per value specified.",
                                  type=float,
                                  nargs='*',
-                                 default=[0.5])
+                                 default=np.linspace(1,0,11))
 
 ap.add_argument('-k', '--sample', help="Only valid for gaussian network.Define the number of samples to be drawn from the privatizer network during training. Train a network instance per value specified.",
                                   type=int,
@@ -131,7 +131,7 @@ ap.add_argument('-e', '--epochs', help="Define the number of epochs to run the t
                                   type=int,
                                   default=500)
 
-ap.add_argument('-o', '--output', help="Store the results in a specified file. Default output is no output.",
+ap.add_argument('-o', '--output', help="Store the results in a specified file to json format. Default output is no output.",
                                   type=str,
                                   default=None)
 
