@@ -82,19 +82,10 @@ class MultivariateGaussianMutualInformation(Metric):
 
     def _compute_mutual_information(self, full_cov_table, released_data_size) -> float:
         # TODO: What...torch.square? schur_complement should be invertible.
-        full_cov_table = torch.square(torch.Tensor(full_cov_table))
+        # full_cov_table = torch.square(torch.Tensor(full_cov_table))
+        full_cov_table = torch.Tensor(full_cov_table)
         schur_complement = self._compute_schur_complement(full_cov_table, released_data_size)
         x_cov = full_cov_table[:released_data_size, :released_data_size]
-
-        if (torch.det(x_cov) <= 0):
-            print('determinent x_cov is zero.')
-        if (torch.det(schur_complement) <= 0):
-            print('determinent schur_complement is smaller than 0.')
-
-        if (torch.isnan(torch.det(x_cov))):
-            print('determinent x_cov is NaN.')
-        if (torch.isnan(torch.det(schur_complement))):
-            print('determinent schur_complement is NaN.')
 
         estimated_mutual_information = .5 * torch.log((torch.det(x_cov) / torch.det(schur_complement)))
         return estimated_mutual_information.item()
