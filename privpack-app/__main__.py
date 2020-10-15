@@ -25,8 +25,8 @@ def run_gaussian(args):
         runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, lambd[0], delta[0])
         results = runner.run(train_data, test_data, epochs, batch_size, k[0])
     else:
-        runner = GaussianExperiment()
-        runner.run(train_data, epochs, batch_size, lambd, delta, k)
+        runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size)
+        runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
 
     print(json.dumps(results, sort_keys=True, indent=4))
     if (args.output):
@@ -43,7 +43,7 @@ def run_binary(args):
         results = runner.run(train_data, test_data, epochs, batch_size)
     else:
         runner = BinaryExperiment()
-        results = runner.run(train_data, epochs, batch_size, lambd, delta)
+        results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
     
     print(json.dumps(results, sort_keys=True, indent=4))
     if (args.output):
