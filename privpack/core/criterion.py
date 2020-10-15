@@ -33,6 +33,10 @@ class Criterion(abc.ABC):
     @abc.abstractclassmethod
     def __call__(self, actual, expected):
         pass
+    
+    @abc.abstractclassmethod
+    def __str__(self):
+        pass
 
     def _expected_loss(self, release_probabilities, losses):
         """
@@ -50,6 +54,20 @@ class PGANCriterion():
     def __init__(self):
         self.privacy_criterions = []
         self.adversary_criterions = []
+
+    def __str__(self):
+        str_repr_privacy_crits = ""
+        str_repr_adversary_crits = ""
+
+        for criterion in criterions:
+            if issubclass(type(criterion), PrivacyCriterion):
+                str_repr_privacy_crits += str(criterion
+            elif issubclass(type(criterion), UtilityCriterion):
+                str_repr_adversary_crits += str(criterion)
+            else:
+                raise NotImplementedError("Unhandled Criterion type.")
+
+        return f"Privacy Criterion: {str_repr_privacy_crits} \n Adversary Criterion: {str_repr_adversary_crits} "
 
     def add_privacy_criterion(self, criterion: Criterion):
         self.privacy_criterions.append(criterion)
@@ -91,6 +109,9 @@ class PrivacyCriterion(Criterion):
 
     def __init__(self):
         pass
+
+    def __str__(self):
+        return self.__name__
 
     @abc.abstractclassmethod
     def __call__(self, releases, likelihood_x) -> torch.Tensor:
@@ -159,6 +180,9 @@ class UtilityCriterion(Criterion):
     def __init__(self, lambd, delta_constraint):
         self.lambd = lambd
         self.delta_constraint = delta_constraint
+
+    def __str__(self):
+        return self.__name__ + '({}, {})'.format(self.lambd, self.delta_constraint)
 
     @abc.abstractclassmethod
     def __call__(self, releases, likelihood_x):

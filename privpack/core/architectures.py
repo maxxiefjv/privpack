@@ -58,6 +58,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         self.metrics = metrics
         self.lr = lr
 
+        self.gan_criterion = gan_criterion
         self._privatizer_criterion = gan_criterion.privacy_loss
         self._adversary_criterion = gan_criterion.adversary_loss
 
@@ -146,7 +147,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
               batch_size=1,
               privatizer_train_every_n=1,
               adversary_train_every_n=1,
-              data_sampler=None, k=1):
+              data_sampler=None, k=1, verbose=False):
 
         """
         Train the Generative Adversarial Network using the implemented privatizer and adversary network.
@@ -222,7 +223,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
                 # Elapsed time
                 elapsed = time.time() - start  # Keep track of how much time has elapsed
 
-                if i % 1000 == 0:
+                if verbose and i % 1000 == 0:
                     self._print_network_update(train_data, test_data, epoch, elapsed, adversary_loss.item(), privatizer_loss.item())
 
 class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):

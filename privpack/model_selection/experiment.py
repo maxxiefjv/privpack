@@ -10,6 +10,7 @@ from privpack.core.architectures import GenerativeAdversarialNetwork
 
 from sklearn.model_selection import KFold
 import torch
+import json
 
 class Expectations:
 
@@ -98,7 +99,7 @@ class Experiment:
             'test_average': test_average_metric_results,
         }
 
-    def run(self, data, n_splits, epochs, batch_size, **kwargs):
+    def run(self, data, n_splits, epochs, batch_size, verbose=False, **kwargs):
         kf = KFold(n_splits=n_splits)
 
         runs_results = {}
@@ -108,7 +109,15 @@ class Experiment:
             train_data = data[train_indices]
             test_data = data[test_indices]
 
-            self.network.train(train_data, test_data, epochs=epochs, batch_size=batch_size, **kwargs)
+            if (verbose):
+                print(f"Training network with settings: {}".format(json.dumps({
+                    'epochs': epochs,
+                    'batch_size': batch_size,
+                    'n_splits': n_splits,
+                    'gan_criterion': self.network.gan_criterion 
+                }, indent=4)))
+
+            self.network.train(train_data, test_data, epochs=epochs, batch_size=batch_size, verbose=verbose, **kwargs)
 
             train_expectations = self._compute_expecations(train_data)
             test_expectations = self._compute_expecations(test_data)
