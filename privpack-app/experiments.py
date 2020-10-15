@@ -20,7 +20,7 @@ class BinaryExperiment(ExperimentRunner):
     def run(self, data, epochs, batch_size, lambd, delta, verbose=False):
         results = {}
         n_splits = 3
-        
+
         for d in delta:
             for l in lambd:
                 network_criterion = PGANCriterion()
@@ -37,5 +37,37 @@ class BinaryExperiment(ExperimentRunner):
                 experiment = Experiment(network, expectations)
                 runs_results = experiment.run(data, n_splits=n_splits, epochs=epochs, batch_size=batch_size, verbose=True)
                 results.setdefault(d, {}).setdefault(l, runs_results['averages'])
+
+        return results
+
+
+class GaussianExperiment(ExperimentRunner):
+
+    def __init__(self):
+        pass
+
+    def run(self, data, epochs, batch_size, lambd, delta, k, verbose=False):
+        results = {}
+        n_splits = 3
+
+        for d in delta:
+            for l in lambd:
+                for no_samples in k:
+                    
+                    network_criterion = PGANCriterion()
+                    network_criterion.add_privacy_criterion(MeanSquaredError(lambd=l, delta_constraint=d)).add_privacy_criterion(GaussianMutualInformation())
+                    network_criterion.add_adversary_criterion(NegativeGaussianMutualInformation())
+
+                    network = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, network_criterion, 
+                                    no_hidden_units_per_layer=hidden_layers_width, noise_size=5)
+
+                    expectations = Expectations()
+                    expectations.add_expectation(PartialMultivariateGaussianMutualInformation('E[I(X;Z)]', range(0, privacy_size)), 0, lambda x,y: np.isclose(x, y))
+                    expectations.add_expectation(PartialMultivariateGaussianMutualInformation('E[I(Y;Z)]', range(privacy_size, privacy_size + public_size)), 1, lambda x,y: np.isclose(x, y))
+                    expectations.add_expectation(ComputeDistortion('E[mse(z,y)]', range(privacy_size, privacy_size + public_size)).set_distortion_function(elementwise_mse), 0.5, lambda x,y: x < y)
+
+                    experiment = Experiment(network, expectations)
+                    runs_results = experiment.run(train_data, n_splits=n_splits, epochs=epochs, batch_size=batch_size, verbose=verbose, k=k)
+                    results.setdefault(d, {}).setdefault(l, runs_results['averages'])
 
         return results
