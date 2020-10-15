@@ -176,7 +176,9 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
 
         assert schur_complement.size() == torch.Size([5, 5])
         assert torch.det(schur_complement) > 0
-        # assert np.isclose(torch.det(schur_complement).item(),0, atol=1e-1) or torch.det(schur_complement) > 0
+
+
+
 
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():
