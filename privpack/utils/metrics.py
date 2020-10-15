@@ -125,7 +125,7 @@ class MultivariateGaussianMutualInformation(Metric):
         """
         (A, B, C, D) = self._prepare_schur_complement(cov_table, released_data_size)
         assert torch.equal(C.T, B)
-        return (D - torch.matmul(torch.matmul(C,torch.inverse(A)), C.T))
+        return (A - torch.matmul(torch.matmul(B,torch.inverse(D)), B.T))
 
     def _get_positive_definite_covariance(self, numpy_release, numpy_data):
         """
