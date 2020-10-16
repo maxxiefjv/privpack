@@ -15,8 +15,15 @@ import json
 def run_bmi(args):
     BMIExperiment().run(args)
 
-def run_gaussian(args):
+def run_gaussian_1(args):
+    (privacy_size, public_size, hidden_layers_width, release_size) = (1, 1, 5, 1)
+    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args)
+
+def run_gaussian_5(args):
     (privacy_size, public_size, hidden_layers_width, release_size) = (5, 5, 20, 5)
+    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args)
+
+def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args):
     (epochs, batch_size, lambd, delta, k) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
     (train_data, test_data) = get_gaussian_data(privacy_size, public_size, print_metrics=True)
     
@@ -52,7 +59,8 @@ def run_binary(args):
 
 network_arg_switcher = {
     'binary': run_binary,
-    'gaussian': run_gaussian,
+    'gaussian1': run_gaussian_1,
+    'gaussian5': run_gaussian_5,
     'bmi': run_bmi
 }
 

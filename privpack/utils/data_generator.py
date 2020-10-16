@@ -99,13 +99,13 @@ class DataGenerator():
 
     def get_ppan_distribution_params(x_dim, y_dim):
 
-        correlation_coefficients = torch.Tensor([0.47, 0.24, 0.85, 0.07, 0.66])
+        correlation_coefficients = torch.Tensor([0.47, 0.24, 0.85, 0.07, 0.66])[:x_dim]
         cov_top = torch.cat(
             (torch.eye(x_dim), torch.diag(correlation_coefficients)), dim=1)
         cov_bot = torch.cat(
             (torch.diag(correlation_coefficients), torch.eye(x_dim)), dim=1)
         cov = torch.cat((cov_top, cov_bot))
-        mu = torch.zeros(x_dim + y_dim)
+        mu = torch.zeros(x_dim * 2)
         return (mu, cov)
 
     def get_completely_uncorrelated_distribution_params(x_dim, y_dim):

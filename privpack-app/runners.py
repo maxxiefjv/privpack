@@ -17,7 +17,8 @@ import json
 
 
 def get_gaussian_data(privacy_size, public_size, print_metrics=False):
-    (mu, cov) = DataGenerator.get_completely_uncorrelated_distribution_params(privacy_size, public_size)
+    # (mu, cov) = DataGenerator.get_completely_uncorrelated_distribution_params(privacy_size, public_size)
+    (mu, cov) = DataGenerator.get_ppan_distribution_params(privacy_size, public_size)
     return DataGenerator.generate_gauss_mixture_data(mu, cov, seed=0)
 
 def get_binary_data(privacy_size, public_size, print_metrics=False):
