@@ -38,7 +38,7 @@ class BinaryExperiment(ExperimentRunner):
                 expectations = Expectations()
                 expectations.add_expectation(PartialBivariateBinaryMutualInformation('I(X;Z)', 0), 0, lambda x,y: np.isclose(x, y))
                 expectations.add_expectation(PartialBivariateBinaryMutualInformation('I(Y;Z)', 1), 1, lambda x,y: np.isclose(x, y))
-                expectations.add_expectation(ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64)), 0.5, lambda x,y: x < y)
+                expectations.add_expectation(ComputeDistortion('E[hamm(x,y)]', [1]).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64)), 0.5, lambda x,y: x < y)
 
                 experiment = Experiment(network, expectations)
                 runs_results = experiment.run(data, n_splits=n_splits, epochs=epochs, batch_size=batch_size, verbose=verbose)
