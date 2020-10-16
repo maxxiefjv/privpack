@@ -160,7 +160,10 @@ class ComputeDistortion(Metric):
         return self
 
     def compute_distortion(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
-        return self.distortion(released_data, data[:, self.dimensions]).mean().item()
+        inp_data = data[:, self.dimensions]
+        if not inp_data.size() == released_data.size():
+            raise RuntimeError('Tensors must have same size: got {} and {}'.format(released_data.size(), inp_data.size()))
+        return self.distortion(released_data, inp_data).mean().item()
 
     def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.compute_distortion(released_data, data)
