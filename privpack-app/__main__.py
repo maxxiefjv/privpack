@@ -33,7 +33,7 @@ def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, a
         results = runner.run(train_data, test_data, epochs, batch_size, k[0])
     else:
         runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size)
-        runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
+        results = runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
 
     print(json.dumps(results, sort_keys=True, indent=4))
     if (args.output):
