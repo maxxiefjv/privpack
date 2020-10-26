@@ -237,6 +237,9 @@ class MeanSquaredError(UtilityCriterion):
         - `releases`: tensor of all releases done by some privatizer network.
         - `expected`: expected/most utility release values.
         """
+        if len(releases.size()) < 3:
+            raise RuntimeError("Tensor must have at least three dimensions: [releases, no_samples, no_features], but has shape: {}".format(releases.size()))
+
         summed_mse = torch.zeros(releases.size(1))
         for release in releases:
             mse = elementwise_mse(release, expected)
