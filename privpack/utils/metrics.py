@@ -36,7 +36,7 @@ class Metric(abc.ABC):
 
 class BivariateBinaryMutualInformation(Metric):
 
-    def _compute_mutual_information(self, dist: torch.Tensor) -> float:
+    def compute_mutual_information(self, dist: torch.Tensor) -> float:
         P_x = [sum(dist[0, :]), sum(dist[1, :])]
         P_y = [sum(dist[:, 0]), sum(dist[:, 1])]
         MI_binXY = 0
@@ -50,7 +50,7 @@ class BivariateBinaryMutualInformation(Metric):
 
         return MI_binXY
 
-    def _estimate_binary_distribution(self, data: torch.Tensor) -> torch.Tensor:
+    def estimate_binary_distribution(self, data: torch.Tensor) -> torch.Tensor:
         Px1_y1 = sum([1 for entry in data if entry[0] == 1 and entry[1] == 1]) / len(data)
         Px1_y0 = sum([1 for entry in data if entry[0] == 1 and entry[1] == 0]) / len(data)
         Px0_y1 = sum([1 for entry in data if entry[0] == 0 and entry[1] == 1]) / len(data)
@@ -63,8 +63,8 @@ class BivariateBinaryMutualInformation(Metric):
 
     def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         full_data_tensor = torch.cat((released_data.view(-1, 1), data.view(-1, 1)), dim=1)
-        full_data_distribution = self._estimate_binary_distribution(full_data_tensor)
-        return self._compute_mutual_information(full_data_distribution).item()
+        full_data_distribution = self.estimate_binary_distribution(full_data_tensor)
+        return self.compute_mutual_information(full_data_distribution).item()
 
     def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.mi(released_data, data)
@@ -80,7 +80,7 @@ class PartialBivariateBinaryMutualInformation(BivariateBinaryMutualInformation):
 
 class MultivariateGaussianMutualInformation(Metric):
 
-    def _compute_mutual_information(self, full_cov_table, released_data_size) -> float:
+    def compute_mutual_information(self, full_cov_table, released_data_size) -> float:
         # TODO: What...torch.square? schur_complement should be invertible.
         # full_cov_table = torch.square(torch.Tensor(full_cov_table))
         full_cov_table = torch.Tensor(full_cov_table)
@@ -136,7 +136,7 @@ class MultivariateGaussianMutualInformation(Metric):
         numpy_data = data.cpu().numpy()
 
         full_cov = self._get_positive_definite_covariance(numpy_release, numpy_data)
-        return self._compute_mutual_information(full_cov, released_data.size(1))
+        return self.compute_mutual_information(full_cov, released_data.size(1))
 
     def __call__(self, released_data, data):
         return self.mi(released_data, data)
