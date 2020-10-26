@@ -1,0 +1,116 @@
+{
+    "1.0": {
+        "500": {
+            "test_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.8512274821599324,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 0.9864980578422546,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 49.83945719401041,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            },
+            "train_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.8551740845044455,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 1.0054522951443992,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 49.83245086669922,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            }
+        }
+    },
+    "1.5": {
+        "500": {
+            "test_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.6596661408742268,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 0.9345675706863403,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 33.01324653625488,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            },
+            "train_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.6594165563583374,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 0.9188325206438701,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 32.85033353169759,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            }
+        }
+    },
+    "2.0": {
+        "500": {
+            "test_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.9048491517702739,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 0.7440266609191895,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 51.79750506083171,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            },
+            "train_average": {
+                "E[I(X;Z)]": {
+                    "actual_out": 0.9123900930086772,
+                    "expected_out": 0,
+                    "satisfies": false
+                },
+                "E[I(Y;Z)]": {
+                    "actual_out": 0.7369566758473713,
+                    "expected_out": 1,
+                    "satisfies": false
+                },
+                "E[mse(z,y)]": {
+                    "actual_out": 51.524664560953774,
+                    "expected_out": 0.5,
+                    "satisfies": false
+                }
+            }
+        }
+    }
+}
