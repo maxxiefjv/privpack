@@ -29,8 +29,8 @@ def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, a
     
     results = {}
     if len(lambd) == 1 and len(delta) == 1 and len(k) == 1:
-        runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, lambd[0], delta[0])
-        results = runner.run(train_data, test_data, epochs, batch_size, k[0])
+        runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, lambd[0], delta[0], lr=1e-2)
+        results = runner.run(train_data, test_data, epochs, batch_size, k[0], verbose=True)
     else:
         runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size)
         results = runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
@@ -47,7 +47,7 @@ def run_binary(args):
     results = {}
     if len(lambd) == 1 and len(delta) == 1:
         runner = BinaryNetworkRunner(lambd[0], delta[0])
-        results = runner.run(train_data, test_data, epochs, batch_size)
+        results = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
     else:
         runner = BinaryExperiment()
         results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
@@ -70,7 +70,7 @@ arguments and options defined below.
 """)
 
 ap.add_argument('network', help="Define which implementation of the GAN defined in the privpack library to run.", 
-                            metavar="{binary, gaussian}",
+                            metavar=list(network_arg_switcher.keys()),
                             choices=network_arg_switcher.keys())
 
 ap.add_argument('-l', '--lambd', help="Define the lambda to use in the loss function. Train a network instance per value specified.",

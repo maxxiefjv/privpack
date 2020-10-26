@@ -17,12 +17,14 @@ import json
 
 
 def get_gaussian_data(privacy_size, public_size, print_metrics=False):
-    # (mu, cov) = DataGenerator.get_completely_uncorrelated_distribution_params(privacy_size, public_size)
-    (mu, cov) = DataGenerator.get_ppan_distribution_params(privacy_size, public_size)
+    (mu, cov) = DataGenerator.get_completely_uncorrelated_distribution_params(privacy_size, public_size)
+    # (mu, cov) = DataGenerator.get_ppan_distribution_params(privacy_size, public_size)
     return DataGenerator.generate_gauss_mixture_data(mu, cov, seed=0)
 
 def get_binary_data(privacy_size, public_size, print_metrics=False):
-    (norm_dist, acc_dist) = DataGenerator.get_completely_uncorrelated_dist()
+    # (norm_dist, acc_dist) = DataGenerator.get_completely_uncorrelated_dist()
+    # (norm_dist, acc_dist) = DataGenerator.get_completely_correlated_dist()
+    (norm_dist, acc_dist) = DataGenerator.random_binary_dist()
     synthetic_data = DataGenerator.generate_binary_data(10000, acc_dist)
 
     no_train_samples = 8000
@@ -38,13 +40,13 @@ class PGANRunner():
         print("Created runner with parameters lambda: {}, delta: {}".format(lambd, delta))
 
 
-    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int) -> None:
+    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int, verbose=False) -> None:
         self.gan_network.reset()
 
         if k:
-            self.gan_network.train(train_data, test_data, epochs, batch_size=batch_size, k=k)
+            self.gan_network.train(train_data, test_data, epochs, batch_size=batch_size, k=k, verbose=verbose)
         else :
-            self.gan_network.train(train_data, test_data, epochs, batch_size=batch_size)
+            self.gan_network.train(train_data, test_data, epochs, batch_size=batch_size, verbose=verbose)
         
         with torch.no_grad():
             released_train_data = self.gan_network.privatize(train_data)
@@ -63,11 +65,11 @@ class PGANRunner():
 
 class GaussianNetworkRunner(PGANRunner):
 
-    def __init__(self, privacy_size: int, public_size: int, hidden_layers_width: int, release_size: int, lambd: int, delta: float):
+    def __init__(self, privacy_size: int, public_size: int, hidden_layers_width: int, release_size: int, lambd: int, delta: float, lr: int = 1e-3):
         super().__init__(
             gan_network = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, 
                                 PGANCriterion().add_privacy_criterion(GaussianMutualInformation()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMutualInformation()),
-                                no_hidden_units_per_layer=hidden_layers_width, noise_size=5),
+                                no_hidden_units_per_layer=hidden_layers_width, noise_size=5, lr=lr),
             metrics = [
                 PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),
                 PartialMultivariateGaussianMutualInformation('E[MI_YZ]', range(privacy_size, privacy_size + public_size)),
@@ -76,8 +78,8 @@ class GaussianNetworkRunner(PGANRunner):
             lambd= lambd, delta= delta
         )
 
-    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int) -> None:
-        return super().run(train_data, test_data, epochs, batch_size, k)
+    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int, verbose=False) -> None:
+        return super().run(train_data, test_data, epochs, batch_size, k, verbose=verbose)
 
 class BinaryNetworkRunner(PGANRunner):
 
@@ -94,6 +96,6 @@ class BinaryNetworkRunner(PGANRunner):
             lambd= lambd, delta= delta
         )
 
-    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int) -> None:
-        return super().run(train_data, test_data, epochs, batch_size, None)
+    def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, verbose=False) -> None:
+        return super().run(train_data, test_data, epochs, batch_size, None, verbose=verbose)
         
