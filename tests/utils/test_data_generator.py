@@ -4,6 +4,16 @@ import torch
 
 from privpack.utils import DataGenerator
 
+def test_ppan_gauss_param_scalar_experiment():
+    x_dim = y_dim = 1
+    (mu, cov) = DataGenerator.get_ppan_distribution_params(x_dim, y_dim)
+    
+    assert torch.all(mu == torch.Tensor([0, 0]))
+    assert torch.all(cov == torch.Tensor([
+        [1, 0.85],
+        [0.85, 1]
+    ]))
+
 def test_ratios_binary_data():
 
     for i in range(100):
