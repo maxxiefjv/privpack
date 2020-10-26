@@ -98,8 +98,11 @@ class DataGenerator():
         return (gm_train_data, gm_test_data)
 
     def get_ppan_distribution_params(x_dim, y_dim):
+        if x_dim == 1 and y_dim == 1:
+            correlation_coefficients = torch.Tensor([0.85])
+        else:
+            correlation_coefficients = torch.Tensor([0.47, 0.24, 0.85, 0.07, 0.66])[:x_dim]
 
-        correlation_coefficients = torch.Tensor([0.47, 0.24, 0.85, 0.07, 0.66])[:x_dim]
         cov_top = torch.cat(
             (torch.eye(x_dim), torch.diag(correlation_coefficients)), dim=1)
         cov_bot = torch.cat(
