@@ -25,7 +25,7 @@ def run_gaussian_5(args):
 
 def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args):
     (epochs, batch_size, lambd, delta, k) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
-    (train_data, test_data) = get_gaussian_data(privacy_size, public_size, print_metrics=True)
+    (train_data, test_data) = get_gaussian_data(privacy_size, public_size, args.train_input, print_metrics=True)
     
     results = {}
     if len(lambd) == 1 and len(delta) == 1 and len(k) == 1:
@@ -42,7 +42,7 @@ def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, a
 def run_binary(args):
     (privacy_size, public_size, release_size) = (1, 1, 1)
     (epochs, batch_size, lambd, delta) = (args.epochs, args.batchsize, args.lambd, args.delta)
-    (train_data, test_data) = get_binary_data(privacy_size, public_size, print_metrics=True)
+    (train_data, test_data) = get_binary_data(privacy_size, public_size, args.train_input, print_metrics=True)
     
     results = {}
     if len(lambd) == 1 and len(delta) == 1:
@@ -101,6 +101,9 @@ ap.add_argument('-o', '--output', help="Store the results in a specified file to
                                   type=str,
                                   default=None)
 
+ap.add_argument('-i', '--train-input', help="Specify the input to use in the training procedure.",
+                                  type=str,
+                                  default='uncorrelated')
 
 def main():
     args = ap.parse_args()
