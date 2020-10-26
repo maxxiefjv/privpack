@@ -1,4 +1,3 @@
-
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
 from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 
@@ -6,44 +5,11 @@ from privpack.utils import ComputeDistortion
 from privpack.utils import compute_released_data_metrics, elementwise_mse, PartialMultivariateGaussianMutualInformation
 from privpack.utils import compute_released_data_metrics, hamming_distance, PartialBivariateBinaryMutualInformation
 
-from privpack.utils import DataGenerator
-
 from privpack.core.criterion import PGANCriterion
 from privpack.core.criterion import NegativeGaussianMutualInformation, GaussianMutualInformation, MeanSquaredError
 from privpack.core.criterion import BinaryMutualInformation, BinaryHammingDistance, NegativeBinaryMutualInformation
 
 import torch
-import json
-
-gaussian_data = {
-    'uncorrelated': DataGenerator.get_completely_uncorrelated_distribution_params,
-    'ppan': DataGenerator.get_ppan_distribution_params
-}
-
-binary_data = {
-    'uncorrelated': DataGenerator.get_completely_uncorrelated_dist,
-    'correlated': DataGenerator.get_completely_correlated_dist,
-    'random': DataGenerator.random_binary_dist
-}
-
-def get_gaussian_data(privacy_size, public_size, train_input_name, print_metrics=False):
-    if not train_input_name in gaussian_data:
-        raise RuntimeError('Train data input {} does not exist. For gaussian data we provide: {}'.format(train_input_name, gaussian_data.keys()))
-
-    (mu, cov) = gaussian_data[train_input_name](privacy_size, public_size)
-    return DataGenerator.generate_gauss_mixture_data(mu, cov, seed=0)
-
-def get_binary_data(privacy_size, public_size, train_input_name, print_metrics=False):
-    if not train_input_name in binary_data:
-        raise RuntimeError('Train data input {} does not exist. For binary data we provide: {}'.format(train_input_name, binary_data.keys()))
-    
-    (norm_dist, acc_dist) = binary_data[train_input_name]()
-    synthetic_data = DataGenerator.generate_binary_data(10000, acc_dist)
-
-    no_train_samples = 8000
-    train_data = torch.Tensor(synthetic_data[:no_train_samples])
-    test_data = torch.Tensor(synthetic_data[no_train_samples:])
-    return (train_data, test_data)
 
 class PGANRunner():
     def __init__(self, gan_network, metrics, lambd: int, delta: float):

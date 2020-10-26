@@ -1,10 +1,12 @@
-from runners import GaussianNetworkRunner, get_gaussian_data
-from runners import BinaryNetworkRunner, get_binary_data
+from runners import GaussianNetworkRunner, BinaryNetworkRunner
 from experiments import BinaryExperiment, GaussianExperiment
 from priv_bmi import BMIExperiment
+from utils import get_binary_data, get_gaussian_data
+from utils import save_results
 
 from privpack import BinaryPrivacyPreservingAdversarialNetwork as BinaryGAN
 from privpack import GaussianPrivacyPreservingAdversarialNetwork as GaussGAN
+
 
 
 import argparse
@@ -26,6 +28,9 @@ def run_gaussian_5(args):
 def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args):
     (epochs, batch_size, lambd, delta, k) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
     (train_data, test_data) = get_gaussian_data(privacy_size, public_size, args.train_input, print_metrics=True)
+
+    if not k:
+        k = [1]
     
     results = {}
     if len(lambd) == 1 and len(delta) == 1 and len(k) == 1:
@@ -36,8 +41,7 @@ def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, a
         results = runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
 
     print(json.dumps(results, sort_keys=True, indent=4))
-    if (args.output):
-        json.dump( results, open( args.output + '.json', 'w' ), indent=4 )
+    save_results(results, args)
 
 def run_binary(args):
     (privacy_size, public_size, release_size) = (1, 1, 1)
@@ -53,8 +57,7 @@ def run_binary(args):
         results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
     
     print(json.dumps(results, sort_keys=True, indent=4))
-    if (args.output):
-        json.dump( results, open( args.output + '.json', 'w' ), indent=4 )
+    save_results(results, args)
 
 
 network_arg_switcher = {
@@ -87,7 +90,7 @@ ap.add_argument('-k', '--sample', help="Only valid for gaussian network.Define t
                                   type=int,
                                   nargs='*',
                                   metavar="NO. SAMPLES",
-                                  default=[1])
+                                  default=None)
                                   
 ap.add_argument('-b', '--batchsize', help="Define the number of samples used per minibatch iteration.",
                                      type=int,
@@ -104,6 +107,10 @@ ap.add_argument('-o', '--output', help="Store the results in a specified file to
 ap.add_argument('-i', '--train-input', help="Specify the input to use in the training procedure.",
                                   type=str,
                                   default='uncorrelated')
+
+ap.add_argument('--output-as-suffix', help='Use the output argument as suffix to the default generated outputname',
+                                        default=False, dest='suffix',
+                                        action='store_true')
 
 def main():
     args = ap.parse_args()
