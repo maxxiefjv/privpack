@@ -199,10 +199,10 @@ class GenerativeAdversarialNetwork(abc.ABC):
                     torch.cuda.memory_cached(0) / 1024 ** 3, 1), 'GB')
                 print()
 
-            self.adversary.train()
-            self.privatizer.train()
-
             for i, sample in enumerate(loader):
+                self.adversary.train()
+                self.privatizer.train()
+
                 x_batch = sample[:, :self.privacy_size].to(self.device)
                 y_batch = sample[:, self.privacy_size:].to(self.device)
                 sample = sample.to(self.device)
@@ -224,7 +224,13 @@ class GenerativeAdversarialNetwork(abc.ABC):
                 elapsed = time.time() - start  # Keep track of how much time has elapsed
 
                 if verbose and i % 1000 == 0:
+                    self.adversary.train(mode=False)
+                    self.privatizer.train(mode=False)
                     self._print_network_update(train_data, test_data, epoch, elapsed, adversary_loss.item(), privatizer_loss.item())
+
+    
+        self.adversary.train(mode=False)
+        self.privatizer.train(mode=False)
 
 class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
     """
@@ -449,12 +455,12 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
                 nn.Linear(ppan.n_noise + ppan.privacy_size + ppan.public_size,
                           ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                # nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
                 nn.Linear(ppan.no_hidden_units_per_layer,
                           ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                # nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
                 nn.Linear(ppan.no_hidden_units_per_layer,
