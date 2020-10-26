@@ -1,6 +1,6 @@
 from privpack.utils import DataGenerator
 from privpack.utils.metrics import MultivariateGaussianMutualInformation, ComputeDistortion
-from privpack.utils import hamming_distance
+from privpack.utils import hamming_distance, elementwise_mse
 
 import torch
 import numpy as np
@@ -103,6 +103,95 @@ def test_hamming_distance_none_bad():
     ])
 
     assert 0 == hamm(yhat, W)
+
+def test_mse_distortion_1d():
+    mse = ComputeDistortion('E[mse(x,y)]', [0]).set_distortion_function(elementwise_mse)
+
+    mock_released_samples = torch.Tensor([
+        [0.25],
+        [0.75],
+        [0],
+        [1]
+    ])
+
+    mock_expected_samples = torch.Tensor([
+        [0.3],
+        [0.5],
+        [0.9],
+        [0.3],
+    ])
+
+    expected_out = torch.Tensor([
+        (0.25 - 0.3) ** 2,
+        (0.75 - 0.5) ** 2,
+        (0 - 0.9) ** 2,
+        (1 - 0.3) ** 2,
+    ]).mean().item()
+
+    actual_out = mse(mock_released_samples, mock_expected_samples)
+    
+    print(actual_out, expected_out)
+    assert np.isclose(expected_out, actual_out)
+
+
+@pytest.mark.xfail(raises=RuntimeError)
+def test_mse_distortion_dimension_error():
+    mse = ComputeDistortion('E[mse(x,y)]', 0).set_distortion_function(elementwise_mse)
+
+    mock_released_samples = torch.Tensor([
+        [0.25],
+        [0.75],
+        [0],
+        [1]
+    ])
+
+    mock_expected_samples = torch.Tensor([
+        [0.3],
+        [0.5],
+        [0.9],
+        [0.3],
+    ])
+
+    expected_out = torch.Tensor([
+        (0.25 - 0.3) ** 2,
+        (0.75 - 0.5) ** 2,
+        (0 - 0.9) ** 2,
+        (1 - 0.3) ** 2,
+    ]).mean().item()
+
+    actual_out = mse(mock_released_samples, mock_expected_samples)
+    assert np.isclose(expected_out, actual_out)
+
+
+def test_mse_distortion_5d():
+    mse = ComputeDistortion('E[mse(x,y)]', [0,1,2]).set_distortion_function(elementwise_mse)
+
+    mock_released_samples = torch.Tensor([
+        [0.25, 0.5, 0.75],
+        [0.75, 0.75, 0.75],
+        [0, 0, 0],
+        [1, 1, 1]
+    ])
+
+    mock_expected_samples = torch.Tensor([
+        [0.3, 0.5, 0.5],
+        [0.5, 0.6, 0.4],
+        [0.9, 0.4, 0.3],
+        [0.3, 0.7, 0.6],
+    ])
+
+    expected_out = torch.Tensor([
+        (0.25 - 0.3) ** 2 + (0.5 - 0.5) ** 2 + (0.75 - 0.5) ** 2,
+        (0.75 - 0.5) ** 2 + (0.75 - 0.6) ** 2 + (0.75 - 0.4) ** 2,
+        (0 - 0.9) ** 2 + (0 - 0.4) ** 2 + (0 - 0.3) ** 2,
+        (1 - 0.3) ** 2 + (1 - 0.7) ** 2 + (1 - 0.6) ** 2
+    ]).mean().item()
+
+    actual_out = mse(mock_released_samples, mock_expected_samples)
+    
+    assert np.isclose(expected_out, actual_out)
+
+
 # def test_multivariate_gaussian_mi(fixed_train_data, fixed_test_data):
 #     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Y)')
 #     # mi = multivariate_gauss_statistic(train_x, train_y)

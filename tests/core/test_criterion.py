@@ -81,16 +81,15 @@ def test_discrete_hamming_distance(mock_release_probabilities, mock_public_value
     actual_out = BinaryHammingDistance(lambd, delta_constraint)(mock_release_probabilities, mock_public_values)
     assert torch.all(torch.isclose(actual_out, expected_out))
 
-def test_gauss_mean_squared_error_loss():
+def test_univariate_gauss_mean_squared_error_loss():
     (lambd, delta_constraint) = (1, 0)
-    k = 5
 
     mock_released_samples = torch.Tensor([
         [0.25],
         [0.75],
         [0],
         [1]
-    ]).repeat(k, 1, 1)
+    ]).unsqueeze(0)
 
     mock_expected_samples = torch.Tensor([
         [0.3],
@@ -102,11 +101,42 @@ def test_gauss_mean_squared_error_loss():
     actual_out = MeanSquaredError(lambd, delta_constraint)(mock_released_samples, mock_expected_samples)
 
     expected_out = torch.Tensor([
-        ((0.25 - 0.3) ** 2) ** 2,
-        ((0.75 - 0.5) ** 2) ** 2,
-        ((0 - 0.9) ** 2) ** 2,
-        ((1 - 0.3) ** 2) ** 2,
+        (0.25 - 0.3) ** 2,
+        (0.75 - 0.5) ** 2,
+        (0 - 0.9) ** 2,
+        (1 - 0.3) ** 2,
     ])
+    expected_out = lambd * torch.max(torch.zeros_like(expected_out), expected_out - delta_constraint) ** 2
+
+    print(expected_out, actual_out)
+    assert torch.all(torch.isclose(actual_out, expected_out))
+
+def test_multivariate_gauss_mean_squared_error_loss():
+    (lambd, delta_constraint) = (1, 0)
+
+    mock_released_samples = torch.Tensor([
+        [0.25, 0.5, 0.75],
+        [0.75, 0.75, 0.75],
+        [0, 0, 0],
+        [1, 1, 1]
+    ]).unsqueeze(0)
+
+    mock_expected_samples = torch.Tensor([
+        [0.3, 0.5, 0.5],
+        [0.5, 0.6, 0.4],
+        [0.9, 0.4, 0.3],
+        [0.3, 0.7, 0.6],
+    ])
+
+    actual_out = MeanSquaredError(lambd, delta_constraint)(mock_released_samples, mock_expected_samples)
+
+    expected_out = torch.Tensor([
+        (0.25 - 0.3) ** 2 + (0.5 - 0.5) ** 2 + (0.75 - 0.5) ** 2,
+        (0.75 - 0.5) ** 2 + (0.75 - 0.6) ** 2 + (0.75 - 0.4) ** 2,
+        (0 - 0.9) ** 2 + (0 - 0.4) ** 2 + (0 - 0.3) ** 2,
+        (1 - 0.3) ** 2 + (1 - 0.7) ** 2 + (1 - 0.6) ** 2
+    ])
+    expected_out = lambd * torch.max(torch.zeros_like(expected_out), expected_out - delta_constraint) ** 2
 
     print(expected_out, actual_out)
     assert torch.all(torch.isclose(actual_out, expected_out))
