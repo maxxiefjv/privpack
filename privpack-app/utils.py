@@ -50,6 +50,7 @@ def get_binary_data(privacy_size, public_size, train_input_name, print_metrics=F
     return (train_data, test_data)
 
 def print_gaussian_data_statistics(mu, cov, x_dim, y_dim, train_data, test_data):
+    print("Mu= {}, \nCovariance= {}".format(mu, cov))
     act_mi = MultivariateGaussianMutualInformation('').compute_mutual_information(cov, x_dim)
     est_cov = np.cov(train_data.T)
     est_mi = MultivariateGaussianMutualInformation('').compute_mutual_information(est_cov, x_dim)
@@ -62,6 +63,7 @@ def print_gaussian_data_statistics(mu, cov, x_dim, y_dim, train_data, test_data)
 
 
 def print_binary_data_statistics(norm_dist, train_data, test_data):
+    print("Probability distribution= {}".format(norm_dist))
 
     num_y1_samples_train = sum([1 for x in train_data if x[1] == 1])
     num_y0_samples_train = len(train_data) - num_y1_samples_train

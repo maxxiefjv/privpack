@@ -450,24 +450,43 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         def __init__(self, ppan):
             super(GaussianPrivacyPreservingAdversarialNetwork._Privatizer, self).__init__()
             self.ppan = ppan
+            self.input_size = self.get_input_size(ppan)
 
             self.model = nn.Sequential(
-
-                nn.Linear(ppan.n_noise + ppan.privacy_size + ppan.public_size,
-                          ppan.no_hidden_units_per_layer, bias=False),
-                # nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.Linear(self.input_size, ppan.no_hidden_units_per_layer, bias=False),
+                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
                 nn.Linear(ppan.no_hidden_units_per_layer,
                           ppan.no_hidden_units_per_layer, bias=False),
-                # nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
                 nn.Linear(ppan.no_hidden_units_per_layer,
                           ppan.release_size, bias=False)
             )
 
+        def get_input_size(self, ppan):
+            if self.ppan.observation_model == 'full':
+                return ppan.n_noise + ppan.privacy_size + ppan.public_size
+            elif self.ppan.observation_model == 'public':
+                return ppan.n_noise + ppan.public_size
+            else:
+                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+
+        def apply_observation_model(self, x):
+            if not self.ppan.public_size + self.ppan.privacy_size == x.size(1):
+                raise RuntimeError('Public sizes plus privacy sizes: {} should match the total number of columns: {}'.format(self.ppan.public_size + self.ppan.privacy_size, x.size(1)))
+
+            if self.ppan.observation_model == 'full':
+                return x
+            elif self.ppan.observation_model == 'public':
+                return x[:, self.ppan.privacy_size:]
+            else:
+                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+
         def forward(self, x):
+            x = self.apply_observation_model(x)
             noise = torch.rand(x.size(0), self.ppan.n_noise)
             inp = torch.cat((x, noise), dim=1)
             return self.model(inp)
@@ -500,7 +519,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
             return self.model(x)
 
     def __init__(self, device, privacy_size, public_size, release_size,
-                 gauss_gan_criterion, lr=1e-3, noise_size=5,
+                 gauss_gan_criterion, observation_model='full', lr=1e-3, noise_size=5,
                  no_hidden_units_per_layer=20):
         """
         The behavior of the `GaussianPrivacyPreservingAdversarialNetwork` is mostly defined by the privatizer
@@ -515,8 +534,8 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         - `privacy_size`: The number of private dimensions in the data used with this network.
         - `public_size`: The number of public dimensions in the data used with this network.
         - `release_size`: The number of dimensions the privatizer network should produce.
-        - `privatizer_criterion`: Identifies how to compute the loss of the privatizer network.
-        - `adversary_criterion`: Identifies how to compute the loss of the adversary network.
+        - `gaussian_gan_criterion`: GAN Criterion object for this gaussian data network.
+        - `observation_model`: The type of data_observation: ['full', 'public']
         - `noise_size`: The number of noise dimension to add to the input of the privatizer network. Needed
         for the universal approximator mechanisms to work.
         - `no_hidden_units_per_layer`: Every layer in the gaussian network will have the number of nodes defined
@@ -528,9 +547,13 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
             ComputeDistortion('E[mse(z,y)]', range(privacy_size, privacy_size + public_size)).set_distortion_function(elementwise_mse)
         ], lr=lr)
 
+        if not observation_model in self.observation_models():
+            raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+
         self.no_hidden_units_per_layer = no_hidden_units_per_layer
         self.n_noise = noise_size
         self.release_size = release_size
+        self.observation_model = observation_model
 
         self.device = device
 
@@ -548,6 +571,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.mus = torch.Tensor([])
         self.covs = torch.Tensor([])
 
+    def observation_models(self):
+        return ['full', 'public']    
+    
     def __str__(self):
         return '''Gaussian Mixture Model:
         \n

@@ -49,11 +49,12 @@ class BinaryExperiment(ExperimentRunner):
 
 class GaussianExperiment(ExperimentRunner):
 
-    def __init__(self, privacy_size, public_size, hidden_layers_width, release_size):
+    def __init__(self, privacy_size, public_size, hidden_layers_width, release_size, observation_model):
         self.privacy_size = privacy_size
         self.public_size = public_size
         self.hidden_layers_width = hidden_layers_width
         self.release_size = release_size
+        self.observation_model = observation_model
 
     def run(self, data, epochs, batch_size, lambd, delta, k, verbose=False):
         results = {}
@@ -68,7 +69,7 @@ class GaussianExperiment(ExperimentRunner):
                     network_criterion.add_adversary_criterion(NegativeGaussianMutualInformation())
 
                     network = GaussGAN(torch.device('cpu'), self.privacy_size, self.public_size, self.release_size, network_criterion, 
-                                    no_hidden_units_per_layer=self.hidden_layers_width, noise_size=5)
+                                        self.observation_model, no_hidden_units_per_layer=self.hidden_layers_width, noise_size=5)
 
                     expectations = Expectations()
                     expectations.add_expectation(PartialMultivariateGaussianMutualInformation('E[I(X;Z)]', range(0, self.privacy_size)), 0, lambda x,y: np.isclose(x, y))

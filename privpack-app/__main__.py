@@ -19,25 +19,28 @@ def run_bmi(args):
 
 def run_gaussian_1(args):
     (privacy_size, public_size, hidden_layers_width, release_size) = (1, 1, 5, 1)
-    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args)
+    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model='full', args=args)
 
 def run_gaussian_5(args):
     (privacy_size, public_size, hidden_layers_width, release_size) = (5, 5, 20, 5)
-    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args)
+    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model='public', args=args)
 
-def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, args):
-    (epochs, batch_size, lambd, delta, k) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
+def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model, args):
+    (epochs, batch_size, lambd, delta, ks) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
     (train_data, test_data) = get_gaussian_data(privacy_size, public_size, args.train_input, print_metrics=True)
 
-    if not k:
-        k = [1]
+    if not ks:
+        ks = [1]
     
     results = {}
-    if len(lambd) == 1 and len(delta) == 1 and len(k) == 1:
-        runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, lambd[0], delta[0], lr=1e-2)
-        results = runner.run(train_data, test_data, epochs, batch_size, k[0], verbose=True)
+    if not args.validate:
+         for d in delta:
+            for l in lambd:
+                for k in ks:
+                    runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, observation_model, l, d, lr=1e-2)
+                    results = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
     else:
-        runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size)
+        runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size, observation_model)
         results = runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
 
     print(json.dumps(results, sort_keys=True, indent=4))
@@ -49,9 +52,11 @@ def run_binary(args):
     (train_data, test_data) = get_binary_data(privacy_size, public_size, args.train_input, print_metrics=True)
     
     results = {}
-    if len(lambd) == 1 and len(delta) == 1:
-        runner = BinaryNetworkRunner(lambd[0], delta[0])
-        results = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
+    if not args.validate:
+         for d in delta:
+            for l in lambd:
+                runner = BinaryNetworkRunner(l, d)
+                results = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
     else:
         runner = BinaryExperiment()
         results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
@@ -110,6 +115,10 @@ ap.add_argument('-i', '--train-input', help="Specify the input to use in the tra
 
 ap.add_argument('--output-as-suffix', help='Use the output argument as suffix to the default generated outputname',
                                         default=False, dest='suffix',
+                                        action='store_true')
+
+ap.add_argument('--validate', help='Validate this run with kfold validation.',
+                                        default=False,
                                         action='store_true')
 
 def main():
