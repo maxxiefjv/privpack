@@ -192,6 +192,50 @@ def test_mse_distortion_5d():
     assert np.isclose(expected_out, actual_out)
 
 
+def test_mse_distortion_example():
+    data = torch.Tensor([
+        [-1.5870],
+        [-0.3276],
+        [-2.0638],
+        [-0.9552],
+        [ 0.2117],
+        [ 0.2597],
+        [-0.6986],
+        [-0.3355],
+        [-1.4931],
+        [-0.5350]
+    ])
+
+    release = torch.Tensor([
+        [-0.1676],
+        [ 0.0000],
+        [ 0.0000],
+        [ 0.1059],
+        [ 0.4314],
+        [-0.0876],
+        [-0.0558],
+        [ 0.0000],
+        [ 0.0000],
+        [ 0.0420]
+    ])
+
+    actual = elementwise_mse(release, data)
+    expected = torch.Tensor([
+        (-1.5870 - -0.1676) ** 2,
+        (-0.3276) ** 2,
+        (-2.0638) ** 2,
+        (-0.9552 - 0.1059) ** 2,
+        ( 0.2117 - 0.4314) ** 2,
+        ( 0.2597 - -0.0876) ** 2,
+        (-0.6986 - -0.0558) ** 2,
+        (-0.3355) ** 2,
+        (-1.4931) ** 2,
+        (-0.5350 - 0.0420) ** 2
+    ])
+
+    assert torch.all(torch.isclose(actual, expected, atol=1e-4))
+    assert actual.mean() > 0
+
 # def test_multivariate_gaussian_mi(fixed_train_data, fixed_test_data):
 #     multivariate_gauss_statistic = MultivariateGaussianMutualInformation('I(X;Y)')
 #     # mi = multivariate_gauss_statistic(train_x, train_y)

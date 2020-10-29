@@ -136,10 +136,44 @@ def test_multivariate_gauss_mean_squared_error_loss():
         (0 - 0.9) ** 2 + (0 - 0.4) ** 2 + (0 - 0.3) ** 2,
         (1 - 0.3) ** 2 + (1 - 0.7) ** 2 + (1 - 0.6) ** 2
     ])
-    expected_out = lambd * torch.max(torch.zeros_like(expected_out), expected_out - delta_constraint) ** 2
+    expected_out_2 = lambd * torch.max(torch.zeros_like(expected_out), expected_out - delta_constraint) ** 2
 
-    print(expected_out, actual_out)
-    assert torch.all(torch.isclose(actual_out, expected_out))
+    assert expected_out_2.size() == torch.Size([4])
+    assert torch.all(expected_out ** 2 == expected_out_2)
+    assert torch.all(torch.isclose(actual_out, expected_out_2))
+    
+
+def test_univariate_gauss_mean_squared_error_loss_2():
+    (lambd, delta_constraint) = (1, 0)
+
+    yhat = torch.Tensor([
+        [ 0.4799],
+        [ 0.2422],
+        [ 0.5023],
+        [ 0.3356],
+        [-0.0519]
+    ]).unsqueeze(0)
+        
+    y = torch.Tensor([
+        [-1.5870],
+        [-0.3276],
+        [-2.0638],
+        [-0.9552],
+        [ 0.2117]
+    ]) 
+            
+    actual = MeanSquaredError(lambd, delta_constraint)(yhat, y)
+
+    expected = torch.Tensor([
+        (0.4799 - -1.5870) ** 4,
+        (0.2422 - -0.3276) ** 4,
+        (0.5023 - -2.0638) ** 4,
+        (0.3356 - -0.9552) ** 4,
+        (-0.0519 - 0.2117) ** 4,
+    ])
+
+    assert torch.all(torch.isclose(actual, expected, atol=1e-4))
+
 
 def test_gan_criterion(mock_release_probabilities, mock_x_likelihoods, mock_public_values):
     (lambd, delta_constraint) = (1, 0)
