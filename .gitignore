@@ -149,3 +149,5 @@ dmypy.json
 ## PROJECT SPECIFIC
 privpack-app/Data
 privpack-app/bmi-predictor
+
+results/
