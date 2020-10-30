@@ -17,6 +17,7 @@ class PGANRunner():
         self.metrics = metrics
 
         print("Created runner with parameters lambda: {}, delta: {}".format(lambd, delta))
+        print("Created GAN: {}".format(str(gan_network)))
 
 
     def run(self, train_data: torch.Tensor, test_data: torch.Tensor, epochs: int, batch_size: int, k: int, verbose=False) -> None:
@@ -44,11 +45,11 @@ class PGANRunner():
 
 class GaussianNetworkRunner(PGANRunner):
 
-    def __init__(self, privacy_size: int, public_size: int, hidden_layers_width: int, release_size: int, observation_model: str, lambd: int, delta: float, lr: int = 1e-3):
+    def __init__(self, privacy_size: int, public_size: int, noise_size: int, hidden_layers_width: int, release_size: int, observation_model: str, lambd: int, delta: float, lr: int = 1e-3):
         super().__init__(
             gan_network = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, 
                                 PGANCriterion().add_privacy_criterion(GaussianMutualInformation()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMutualInformation()),
-                                observation_model=observation_model, no_hidden_units_per_layer=hidden_layers_width, noise_size=5, lr=lr),
+                                observation_model=observation_model, no_hidden_units_per_layer=hidden_layers_width, noise_size=noise_size, lr=lr),
             metrics = [
                 PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),
                 PartialMultivariateGaussianMutualInformation('E[MI_YZ]', range(privacy_size, privacy_size + public_size)),
@@ -70,7 +71,7 @@ class BinaryNetworkRunner(PGANRunner):
             metrics = [
                 PartialBivariateBinaryMutualInformation('E[MI_ZX]', 0),
                 PartialBivariateBinaryMutualInformation('E[MI_ZY]', 1),
-                ComputeDistortion('E[hamm(x,y)]', 1).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
+                ComputeDistortion('E[hamm(x,y)]', [1]).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
             ],
             lambd= lambd, delta= delta
         )
