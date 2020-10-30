@@ -46,7 +46,7 @@ class BivariateBinaryMutualInformation(Metric):
 
                 if P_x[x] == 0 or P_y[y] == 0 or dist[x, y] == 0:
                     continue
-                MI_binXY += dist[x, y] * math.log2((dist[x, y] / (P_x[x] * P_y[y])))
+                MI_binXY += dist[x, y].item() * math.log2((dist[x, y].item() / (P_x[x] * P_y[y])))
 
         return MI_binXY
 
@@ -64,7 +64,7 @@ class BivariateBinaryMutualInformation(Metric):
     def mi(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         full_data_tensor = torch.cat((released_data.view(-1, 1), data.view(-1, 1)), dim=1)
         full_data_distribution = self.estimate_binary_distribution(full_data_tensor)
-        return self.compute_mutual_information(full_data_distribution).item()
+        return self.compute_mutual_information(full_data_distribution)
 
     def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
         return self.mi(released_data, data)
@@ -163,6 +163,7 @@ class ComputeDistortion(Metric):
         inp_data = data[:, self.dimensions]
         if not inp_data.size() == released_data.size():
             raise RuntimeError('Tensors must have same size: got {} and {}'.format(released_data.size(), inp_data.size()))
+
         return self.distortion(released_data, inp_data).mean().item()
 
     def __call__(self, released_data: torch.Tensor, data: torch.Tensor) -> float:
