@@ -140,7 +140,9 @@ class DiscreteMutualInformation(PrivacyCriterion):
 
         return the mutual information for discrete values.
         """
-        return super()._expected_loss(release_all_probabilities, torch.log2(likelihood_x))
+        eps = 1e-7
+        log_likelihood = torch.log2(likelihood_x + eps)
+        return super()._expected_loss(release_all_probabilities, log_likelihood)
 
 class BinaryMutualInformation(DiscreteMutualInformation):
 
@@ -159,6 +161,10 @@ class NegativeBinaryMutualInformation(BinaryMutualInformation):
             return -1 * super().__call__(releases, actual_private_values)
 
 class GaussianMutualInformation(PrivacyCriterion):
+    """
+    Compute the loss variant of the mutual information between Gaussian X and Release Z.
+    This is identical to the log-likelihood: log( Q(X|Z) ).
+    """
 
     def __call__(self, releases, likelihood_x):
         return self.gaussian_mutual_information_loss(releases, likelihood_x)
@@ -167,10 +173,14 @@ class GaussianMutualInformation(PrivacyCriterion):
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
         return super()._expected_loss(probabilities, log_likelihoods)
-
+        
 class NegativeGaussianMutualInformation(GaussianMutualInformation):
-        def __call__(self, releases, actual_private_values):
-            return -1 * super().__call__(releases, actual_private_values)
+    """
+    Compute the opposite direction of GaussianMutualInformation. 
+    This is identical to -1 * log (Q(X|Z)) = log ( 1 / Q(X|Z) )
+    """
+    def __call__(self, releases, actual_private_values):
+        return -1 * super().__call__(releases, actual_private_values)
 
 class UtilityCriterion(Criterion):
     """
@@ -239,7 +249,7 @@ class MeanSquaredError(UtilityCriterion):
         """
         if len(releases.size()) < 3:
             raise RuntimeError("Tensor must have at least three dimensions: [releases, no_samples, no_features], but has shape: {}".format(releases.size()))
-
+        
         summed_mse = torch.zeros(releases.size(1))
         for release in releases:
             mse = elementwise_mse(release, expected)
