@@ -18,29 +18,35 @@ def run_bmi(args):
     BMIExperiment().run(args)
 
 def run_gaussian_1(args):
-    (privacy_size, public_size, hidden_layers_width, release_size) = (1, 1, 5, 1)
-    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model='full', args=args)
+    (privacy_size, public_size, noise_size, hidden_layers_width, release_size) = (1, 1, 1, 5, 1)
+    run_gaussian(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model='full', args=args)
 
 def run_gaussian_5(args):
-    (privacy_size, public_size, hidden_layers_width, release_size) = (5, 5, 20, 5)
-    run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model='public', args=args)
+    (privacy_size, public_size, noise_size, hidden_layers_width, release_size) = (5, 5, 8, 20, 5)
+    run_gaussian(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model='public', args=args)
 
-def run_gaussian(privacy_size, public_size, hidden_layers_width, release_size, observation_model, args):
+def run_gaussian(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model, args):
     (epochs, batch_size, lambd, delta, ks) = (args.epochs, args.batchsize, args.lambd, args.delta, args.sample)
     (train_data, test_data) = get_gaussian_data(privacy_size, public_size, args.train_input, print_metrics=True)
 
     if not ks:
         ks = [1]
+
+    print("Training with lambdas: {}, deltas: {}, ks: {}".format(lambd, delta, ks))
+    lr = args.learning_rate
     
     results = {}
     if not args.validate:
          for d in delta:
             for l in lambd:
                 for k in ks:
-                    runner = GaussianNetworkRunner(privacy_size, public_size, hidden_layers_width, release_size, observation_model, l, d, lr=1e-2)
-                    results = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
+                    runner = GaussianNetworkRunner(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model, l, d, lr=lr)
+                    result = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
+                    results.setdefault(d, {}).setdefault(l, result)
+                    save_results(results, args)
+
     else:
-        runner = GaussianExperiment(privacy_size, public_size, hidden_layers_width, release_size, observation_model)
+        runner = GaussianExperiment(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model)
         results = runner.run(train_data, epochs, batch_size, lambd, delta, k, verbose=True)
 
     print(json.dumps(results, sort_keys=True, indent=4))
@@ -51,12 +57,16 @@ def run_binary(args):
     (epochs, batch_size, lambd, delta) = (args.epochs, args.batchsize, args.lambd, args.delta)
     (train_data, test_data) = get_binary_data(privacy_size, public_size, args.train_input, print_metrics=True)
     
+    print("Training with lambdas: {}, deltas: {}".format(lambd, delta))
+
     results = {}
     if not args.validate:
          for d in delta:
             for l in lambd:
                 runner = BinaryNetworkRunner(l, d)
-                results = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
+                result = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
+                results.setdefault(d, {}).setdefault(l, result)
+
     else:
         runner = BinaryExperiment()
         results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
@@ -108,6 +118,10 @@ ap.add_argument('-e', '--epochs', help="Define the number of epochs to run the t
 ap.add_argument('-o', '--output', help="Store the results in a specified file to json format. Default output is no output.",
                                   type=str,
                                   default=None)
+
+ap.add_argument('-r', '--learning-rate', help="Specify the learning rate with which you want to train the release mechanism.",
+                                  type=float,
+                                  default=1e-2)
 
 ap.add_argument('-i', '--train-input', help="Specify the input to use in the training procedure.",
                                   type=str,
