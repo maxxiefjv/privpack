@@ -14,6 +14,7 @@ needed by the privatizer and adversary using the therefore predefined functions 
    binary_gan_criterion = PGANCriterion()
    binary_gan_criterion.add_privacy_criterion(BinaryMutualInformation())
    binary_gan_criterion.add_privacy_criterion(BinaryHammingDistance(lambd, delta_constraint))
+   binary_gan_criterion.add_adversary_criterion(NegativeBinaryMutualInformation())
 
 
 API Documentation
