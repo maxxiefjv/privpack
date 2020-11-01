@@ -189,7 +189,7 @@ class GaussianMaximalLeakage(PrivacyCriterion):
 
 class GaussianAlphaLeakage(PrivacyCriterion):
 
-    def __init__(self, a)
+    def __init__(self, a):
         self.alpha = a
 
     def __call__(self, releases, log_likelihoods):
