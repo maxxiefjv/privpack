@@ -9,6 +9,7 @@ from privpack.utils.metrics import MultivariateGaussianMutualInformation
 
 
 import torch
+import torch.nn as nn
 import pytest
 import numpy as np
 
@@ -178,7 +179,30 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
         assert torch.det(schur_complement) > 0
 
 
+def test_binary_class(lambda_and_delta, batch_size, uncorrelated_train_and_test_data, mock_release_probabilities):
+    class My_Privatizer(nn.Module):
+        """
+        Adversary network consisting of a single linear transformation followed by the non-linear
+        Sigmoid activation
+        """
+        def __init__(self, gan_parent):
+            super().__init__()
+            self.model = nn.Sequential(
+                nn.Linear(1, 1, bias=False),
+                nn.Sigmoid()
+            )
 
+        def forward(self, x):
+            return self.model(x)
+
+    (lambd, delta_constraint) = lambda_and_delta
+    (train_data, test_data) = uncorrelated_train_and_test_data
+
+    binary_gan = BinaryGAN(torch.device('cpu'), PGANCriterion())
+    str_representation = str(binary_gan)
+    binary_gan.set_privatizer_class(My_Privatizer)
+    
+    assert not str_representation == str(binary_gan)
 
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():

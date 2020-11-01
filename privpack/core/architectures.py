@@ -79,6 +79,14 @@ class GenerativeAdversarialNetwork(abc.ABC):
         """Get the device this network is currently using."""
         return self.device
 
+    def set_privatizer_class(self, privatizer_class):
+        self._Privatizer = privatizer_class
+        self.reset()
+
+    def set_adversary_class(self, adversary_class):
+        self._Adversary = adversary_class
+        self.reset()
+
     @abc.abstractclassmethod
     def reset(self):
         """
@@ -248,11 +256,11 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         Privatizer network consisting of a single linear transformation followed by the non-linear
         Sigmoid activation.
         """
-        def __init__(self, ppan):
+        def __init__(self, gan):
             super().__init__()
-            self.ppan = ppan
+            self.gan = gan
             self.model = nn.Sequential(
-                nn.Linear(ppan.n_noise + ppan.inp_size, 1, bias=False),
+                nn.Linear(gan.n_noise + gan.inp_size, 1, bias=False),
                 nn.Sigmoid()
             )
 
@@ -277,7 +285,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         def forward(self, w):
             one_hot_encoded = self.get_one_hot_encoded_input(w)
-            one_hot_encoded.to(self.ppan.device)
+            one_hot_encoded.to(self.gan.device)
             return self.model(self.get_one_hot_encoded_input(w))
 
     class _Adversary(nn.Module):
@@ -285,7 +293,7 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         Adversary network consisting of a single linear transformation followed by the non-linear
         Sigmoid activation
         """
-        def __init__(self, ppan):
+        def __init__(self, gan):
             super().__init__()
             self.model = nn.Sequential(
                 nn.Linear(1, 1, bias=False),
@@ -336,7 +344,14 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         """
         Informal string representation of this class.
         """
-        return "Binary Privacy-Preserving Adversarial Network"
+        return ''' Binary Privacy-Preserving Adversarial Network:
+        \n
+        Learning Rate: {}
+
+        -----------------------------\n
+        {}\n
+        {}\n
+        '''.format(self.lr, self.privatizer, self.adversary)
 
     def reset(self) -> None:
         """
@@ -447,68 +462,68 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
     to be according to an optimal Privacy-Utility Trade-off.
     """
     class _Privatizer(nn.Module):
-        def __init__(self, ppan):
+        def __init__(self, gan):
             super(GaussianPrivacyPreservingAdversarialNetwork._Privatizer, self).__init__()
-            self.ppan = ppan
-            self.input_size = self.get_input_size(ppan)
+            self.gan = gan
+            self.input_size = self.get_input_size(gan)
 
             self.model = nn.Sequential(
-                nn.Linear(self.input_size, ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.Linear(self.input_size, gan.no_hidden_units_per_layer, bias=False),
+                nn.BatchNorm1d(num_features=gan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
-                nn.Linear(ppan.no_hidden_units_per_layer,
-                          ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.Linear(gan.no_hidden_units_per_layer,
+                          gan.no_hidden_units_per_layer, bias=False),
+                nn.BatchNorm1d(num_features=gan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
-                nn.Linear(ppan.no_hidden_units_per_layer,
-                          ppan.release_size, bias=False)
+                nn.Linear(gan.no_hidden_units_per_layer,
+                          gan.release_size, bias=False)
             )
 
-        def get_input_size(self, ppan):
-            if self.ppan.observation_model == 'full':
-                return ppan.n_noise + ppan.privacy_size + ppan.public_size
-            elif self.ppan.observation_model == 'public':
-                return ppan.n_noise + ppan.public_size
+        def get_input_size(self, gan):
+            if self.gan.observation_model == 'full':
+                return gan.n_noise + gan.privacy_size + gan.public_size
+            elif self.gan.observation_model == 'public':
+                return gan.n_noise + gan.public_size
             else:
-                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(gan.observation_model, gan.observation_models()))
 
         def apply_observation_model(self, x):
-            if not self.ppan.public_size + self.ppan.privacy_size == x.size(1):
-                raise RuntimeError('Public sizes plus privacy sizes: {} should match the total number of columns: {}'.format(self.ppan.public_size + self.ppan.privacy_size, x.size(1)))
+            if not self.gan.public_size + self.gan.privacy_size == x.size(1):
+                raise RuntimeError('Public sizes plus privacy sizes: {} should match the total number of columns: {}'.format(self.gan.public_size + self.gan.privacy_size, x.size(1)))
 
-            if self.ppan.observation_model == 'full':
+            if self.gan.observation_model == 'full':
                 return x
-            elif self.ppan.observation_model == 'public':
-                return x[:, self.ppan.privacy_size:]
+            elif self.gan.observation_model == 'public':
+                return x[:, self.gan.privacy_size:]
             else:
-                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+                raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(gan.observation_model, gan.observation_models()))
 
         def forward(self, x):
             x = self.apply_observation_model(x)
-            noise = torch.rand(x.size(0), self.ppan.n_noise)
+            noise = torch.rand(x.size(0), self.gan.n_noise)
             inp = torch.cat((x, noise), dim=1)
             return self.model(inp)
 
     class _Adversary(nn.Module):
-        def __init__(self, ppan):
+        def __init__(self, gan):
             super(GaussianPrivacyPreservingAdversarialNetwork._Adversary, self).__init__()
-            self.inp_size = ppan.release_size
+            self.inp_size = gan.release_size
             self.out_size = self.inp_size * 2
 
             self.model = nn.Sequential(
-                nn.Linear(self.inp_size, ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.Linear(self.inp_size, gan.no_hidden_units_per_layer, bias=False),
+                nn.BatchNorm1d(num_features=gan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
-                nn.Linear(ppan.no_hidden_units_per_layer,
-                          ppan.no_hidden_units_per_layer, bias=False),
-                nn.BatchNorm1d(num_features=ppan.no_hidden_units_per_layer),
+                nn.Linear(gan.no_hidden_units_per_layer,
+                          gan.no_hidden_units_per_layer, bias=False),
+                nn.BatchNorm1d(num_features=gan.no_hidden_units_per_layer),
                 nn.ReLU(),
                 #
                 # Produce Mu and Sigma.
-                nn.Linear(ppan.no_hidden_units_per_layer,
+                nn.Linear(gan.no_hidden_units_per_layer,
                           self.out_size, bias=False)
             )
 
@@ -548,7 +563,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         ], lr=lr)
 
         if not observation_model in self.observation_models():
-            raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(ppan.observation_model, ppan.observation_models()))
+            raise RuntimeError('Observation model {} not known. Please choose valid observation model: {}'.format(observation_model, self.observation_models()))
 
         self.no_hidden_units_per_layer = no_hidden_units_per_layer
         self.n_noise = noise_size
