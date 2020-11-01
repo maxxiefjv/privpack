@@ -173,6 +173,35 @@ class GaussianMutualInformation(PrivacyCriterion):
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
         return super()._expected_loss(probabilities, log_likelihoods)
+
+class GaussianMaximalLeakage(PrivacyCriterion):
+
+    def __call__(self, releases, log_likelihoods):
+        pass
+
+    def maxL_loss(self, log_likelihoods):
+        return 1 - torch.exp(log_likelihoods)
+
+    def gaussian_maximal_leakage(self, releases, log_likelihoods):
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
+        return super()._expected_loss(probabilities, self.maxL_loss(log_likelihoods))
+
+class GaussianAlphaLeakage(PrivacyCriterion):
+
+    def __init__(self, a)
+        self.alpha = a
+
+    def __call__(self, releases, log_likelihoods):
+        pass
+
+    def alpha_loss(self, log_likelihoods):
+        return (self.alpa / (self.alpha - 1)) ( 1 - torch.pow(torch.exp(log_likelihoods), self.alpa / (self.alpha - 1)))
+
+    def gaussian_maximal_leakage(self, releases, log_likelihoods):
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
+        return super()._expected_loss(probabilities, self.alpha_loss(log_likelihoods))
         
 class NegativeGaussianMutualInformation(GaussianMutualInformation):
     """
