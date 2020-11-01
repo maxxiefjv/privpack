@@ -2,15 +2,20 @@
 Privpack Project
 ====================================
 
-Project information
+Project information:
 
-## TODO: Implement a BMI casus:
-# BMI case uitwerken: Utility en Privacy Measures. Hoe te doen met privacy measures.
-# Implementeren non-parametric estimation MI (II)
-# Test gaussian op NIET volledig onafhankelijke variabele. (I)
-# Declareeer NaN als je gezond geval MI tegenkomt met parametrische schatting MI (III)
-# Create Project information
-# Make privatizer network pluggable (Think about making adversary network pluggable)
+This project is created as part of a master thesis on privacy-preserving release mechanisms inspired by Generative Adversarial Networks. The goal
+of this library is to provide the groundwork for quickly building and testing privpacy-preserving release mechanisms. To read more on the need for such 
+systems in the corresponding thesis {PROVIDE_LINK_TO_THESIS}.
+
+This small-library is built on top of pytorch, and is created to provide the basics for a release mechanisms by using a GAN architecture. However,
+as a researcher every detail may matter to your study. Therefore, this library is built in such a way that it will not restrict the freedom of your work.
+
+In this document you can find the available classes and helper methods to create your release mechanisms. The classes needed for your quick setup are found 
+in the package: privpack/core. This package contains GAN architectures and Basic Criterion classes. Each release mechanisms is built using these building blocks.
+The GAN architecture should define the type of data you want to handle, and the criterions define how the privatizer and adversary should behave. The provided 
+criterions are in the area of information theory and therefore contain the privacy criterion functions to optimize: Mutual information, Maximal Leakage, Alpha-Leakage and Maximal 
+Alpha-Leakage.
 
 
 Privpack API Documentation
