@@ -1,0 +1,15 @@
+python privpack-app gaussian1 -e 250 -b 200 -k 1 -l 50 -d 0 0.2 0.4 0.6 0.8 -i uncorrelated
+
+Mu= tensor([0., 0.]), 
+Covariance= tensor([[1., 0.],
+        [0., 1.]])
+Gaussian Mixture - Actual Mutual Information: 0.0,                             
+Estimated Mutual Information from generated training data: 1.0132779380001011e-06
+Entropy of Y: 1.4189385175704956
+
+Training with lambdas: [50], deltas: [0.0, 0.2, 0.4, 0.6, 0.8], ks: [1]
+ Gaussian data settings:
+            privacy_size: 1,
+            public_size: 1,
+            noise_size: 1,
+            observation_model: full
