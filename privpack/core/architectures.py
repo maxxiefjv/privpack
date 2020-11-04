@@ -593,14 +593,11 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         return '''Gaussian Mixture Model:
         \n
         Learning Rate: {}
-        Train Privatizer Every nth: {}
-        Train Adversary Every nth: {}
 
         -----------------------------\n
         {}\n
         {}\n
-        '''.format(self.lr, self.privatizer_train_every_n, self.adversary_train_every_n,
-                   self.privatizer, self.adversary)
+        '''.format(self.lr, self.privatizer, self.adversary)
 
     def reset(self):
         self.adversary = self._Adversary(self).to(self.device)
