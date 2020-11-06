@@ -6,7 +6,7 @@ Project information:
 
 This project is created as part of a master thesis on privacy-preserving release mechanisms inspired by Generative Adversarial Networks. The goal
 of this library is to provide the groundwork for quickly building and testing privpacy-preserving release mechanisms. To read more on the need for such 
-systems in the corresponding thesis {PROVIDE_LINK_TO_THESIS}.
+systems in the corresponding thesis (in-progress).
 
 This small-library is built on top of pytorch, and is created to provide the basics for a release mechanisms by using a GAN architecture. However,
 as a researcher every detail may matter to your study. Therefore, this library is built in such a way that it will not restrict the freedom of your work.
