@@ -178,10 +178,6 @@ def test_gaussian_release_output_schur_100_times(fixed_train_data):
         assert torch.det(schur_complement) > 0
 
 
-def test_failing_workflow():
-    assert False
-
-
 # TEST TIME IS WAY TO LONG. Caused by k>1?
 # def test_gaussian_privatizer_criterion():
 
