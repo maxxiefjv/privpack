@@ -1,6 +1,8 @@
+# Privpack
+
 This project is part of my Masters Thesis and contains: a small library for quickly producing release mechanisms and a sample program called `privpack-app`. In the library one can find: architectures producing bivariate binary data and multivariate gaussian data, it contains code for defining gan criterion by defining utility and privacy criterions and it contains metric methods to estimate the privacy-leakage by mutual information given some dataset.
 
-# As Contributor
+## As Contributor
 
 The recommended steps to develop on this project include:
 
@@ -17,7 +19,7 @@ pip install -e .[dev]
 
 NOTE: python3 is currently required for this project.
 
-# Testing
+## Testing
 
 For testing purposes one should use the pytest library included in the development requirements of this package. Create your test in the corresponding test file and run the `$ pytest <path/to/test/file>` command in the root directory of this project.
 
