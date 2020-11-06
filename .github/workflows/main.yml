@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.7.3'
       - name: Python Dependency Installation
         # You may pin to the exact commit or the version.
         # uses: py-actions/py-dependency-install@79cf4055e989c617a0679dd99c84a83b2f347460
