@@ -1,4 +1,5 @@
 # Privpack
+[![DOI](https://zenodo.org/badge/299021619.svg)](https://zenodo.org/badge/latestdoi/299021619)
 
 This project is part of my Masters Thesis and contains: a small library for quickly producing release mechanisms and a sample program called `privpack-app`. In the library one can find: architectures producing bivariate binary data and multivariate gaussian data, it contains code for defining gan criterion by defining utility and privacy criterions and it contains metric methods to estimate the privacy-leakage by mutual information given some dataset.
 
