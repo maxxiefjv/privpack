@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'torch==1.4.0',
+        'torch==1.6.0',
         'numpy',
         'scipy',
         'sklearn'
