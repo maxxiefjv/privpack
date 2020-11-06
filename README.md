@@ -1,3 +1,5 @@
+This project is part of my Masters Thesis and contains: a small library for quickly producing release mechanisms and a sample program called `privpack-app`. In the library one can find: architectures producing bivariate binary data and multivariate gaussian data, it contains code for defining gan criterion by defining utility and privacy criterions and it contains metric methods to estimate the privacy-leakage by mutual information given some dataset.
+
 # As Contributor
 
 The recommended steps to develop on this project include:
@@ -21,4 +23,4 @@ For testing purposes one should use the pytest library included in the developme
 
 # Example program
 An example program is available called privpack-app. To run this program open your python environment and run `$ python privpack-app -h` in the root folder of this project. This will show all the options available for running the example app. At this moment
-two Privacy-Preserving networks have been implemented in the example program: Binary and Gaussian. 
+two Privacy-Preserving networks have been implemented in the example program: binary, gaussian1 and gaussian5. 
