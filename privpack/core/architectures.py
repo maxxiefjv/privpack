@@ -61,6 +61,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
         self.gan_criterion = gan_criterion
         self._privatizer_criterion = gan_criterion.privacy_loss
         self._adversary_criterion = gan_criterion.adversary_loss
+        print(json.dumps(gan_criterion.to_json_dict(), indent=4))
 
     def __call__(self, data):
         return self.privatize(data)
