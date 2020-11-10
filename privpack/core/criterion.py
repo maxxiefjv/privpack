@@ -160,6 +160,41 @@ class NegativeBinaryMutualInformation(BinaryMutualInformation):
         def __call__(self, releases, actual_private_values):
             return -1 * super().__call__(releases, actual_private_values)
 
+class BinaryMaximalLeakage(PrivacyCriterion):
+
+    def __call__(self, releases, likelihood_x):
+        return self.maximal_leakage(releases, likelihood_x)
+
+    def maxL_loss(self, likelihood_x):
+        return 1 - likelihood_x
+
+    def maximal_leakage(self, release_probabilities, likelihood_x):
+        release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
+        return super()._expected_loss(probabilities, self.maxL_loss(likelihood_x))
+
+class NegativeBinaryMaximalLeakage(BinaryMaximalLeakage):
+    def __call__(self, releases, actual_private_values):
+        return -1 * super().__call__(releases, actual_private_values)
+
+class BinaryAlphaLeakage(PrivacyCriterion):
+
+    def __init__(self, a):
+        self.alpha = a
+
+    def __call__(self, releases, likelihood_x):
+        return self.alpha_leakage(releases, likelihood_x)
+
+    def alpha_loss(self, likelihood_x):
+        return (self.alpa / (self.alpha - 1)) ( 1 - torch.pow(likelihood_x, ((self.alpa - 1) / self.alpha)))
+
+    def alpha_leakage(self, release_probabilities, likelihood_x):
+        release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
+        return super()._expected_loss(probabilities, self.alpha_loss(likelihood_x))
+
+class NegativeBinaryAlphaLeakage(BinaryAlphaLeakage):
+    def __call__(self, releases, actual_private_values):
+        return -1 * super().__call__(releases, actual_private_values)
+
 class GaussianMutualInformation(PrivacyCriterion):
     """
     Compute the loss variant of the mutual information between Gaussian X and Release Z.
@@ -173,36 +208,7 @@ class GaussianMutualInformation(PrivacyCriterion):
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
         return super()._expected_loss(probabilities, log_likelihoods)
-
-class GaussianMaximalLeakage(PrivacyCriterion):
-
-    def __call__(self, releases, log_likelihoods):
-        pass
-
-    def maxL_loss(self, log_likelihoods):
-        return 1 - torch.exp(log_likelihoods)
-
-    def gaussian_maximal_leakage(self, releases, log_likelihoods):
-        k = releases.size(0)
-        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
-        return super()._expected_loss(probabilities, self.maxL_loss(log_likelihoods))
-
-class GaussianAlphaLeakage(PrivacyCriterion):
-
-    def __init__(self, a):
-        self.alpha = a
-
-    def __call__(self, releases, log_likelihoods):
-        pass
-
-    def alpha_loss(self, log_likelihoods):
-        return (self.alpa / (self.alpha - 1)) ( 1 - torch.pow(torch.exp(log_likelihoods), self.alpa / (self.alpha - 1)))
-
-    def gaussian_maximal_leakage(self, releases, log_likelihoods):
-        k = releases.size(0)
-        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
-        return super()._expected_loss(probabilities, self.alpha_loss(log_likelihoods))
-        
+      
 class NegativeGaussianMutualInformation(GaussianMutualInformation):
     """
     Compute the opposite direction of GaussianMutualInformation. 
