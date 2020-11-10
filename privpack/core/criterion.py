@@ -10,6 +10,7 @@ This module defines the following classes:
 """
 
 import torch
+import numpy as np
 import abc
 
 from privpack.utils import hamming_distance, elementwise_mse
@@ -33,7 +34,7 @@ class Criterion(abc.ABC):
     @abc.abstractclassmethod
     def __call__(self, actual, expected):
         pass
-    
+
     @abc.abstractclassmethod
     def __str__(self):
         pass
@@ -170,7 +171,7 @@ class BinaryMaximalLeakage(PrivacyCriterion):
 
     def maximal_leakage(self, release_probabilities, likelihood_x):
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
-        return super()._expected_loss(probabilities, self.maxL_loss(likelihood_x))
+        return super()._expected_loss(release_probabilities, self.maxL_loss(likelihood_x))
 
 class NegativeBinaryMaximalLeakage(BinaryMaximalLeakage):
     def __call__(self, releases, actual_private_values):
@@ -179,17 +180,27 @@ class NegativeBinaryMaximalLeakage(BinaryMaximalLeakage):
 class BinaryAlphaLeakage(PrivacyCriterion):
 
     def __init__(self, a):
+        if a < 1:
+            raise RuntimeError("Alpha should be bigger than 1, but was {}".format(a))
         self.alpha = a
 
+    def __str__(self):
+        return type(self).__name__ + '(alpha={})'.format(self.alpha)
+
     def __call__(self, releases, likelihood_x):
-        return self.alpha_leakage(releases, likelihood_x)
+        if self.alpha == 1:
+            return BinaryMutualInformation()(releases, likelihood_x)
+        elif self.alpha == np.Inf:
+            return BinaryMaximalLeakage()(releases, likelihood_x)
+        else:
+            return self.alpha_leakage(releases, likelihood_x)
 
     def alpha_loss(self, likelihood_x):
-        return (self.alpa / (self.alpha - 1)) ( 1 - torch.pow(likelihood_x, ((self.alpa - 1) / self.alpha)))
+        return (self.alpha / (self.alpha - 1)) * (1 - torch.pow(likelihood_x, ((self.alpha - 1) / self.alpha)))
 
     def alpha_leakage(self, release_probabilities, likelihood_x):
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
-        return super()._expected_loss(probabilities, self.alpha_loss(likelihood_x))
+        return super()._expected_loss(release_probabilities, self.alpha_loss(likelihood_x))
 
 class NegativeBinaryAlphaLeakage(BinaryAlphaLeakage):
     def __call__(self, releases, actual_private_values):
@@ -208,7 +219,7 @@ class GaussianMutualInformation(PrivacyCriterion):
         k = releases.size(0)
         probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
         return super()._expected_loss(probabilities, log_likelihoods)
-      
+
 class NegativeGaussianMutualInformation(GaussianMutualInformation):
     """
     Compute the opposite direction of GaussianMutualInformation. 
@@ -249,7 +260,7 @@ class BinaryHammingDistance(UtilityCriterion):
 
     def __call__(self, releases, likelihood_x):
         return self.expected_binary_hamming_distance(releases, likelihood_x)
-    
+
     def expected_binary_hamming_distance(self, release_probabilities, expected):
         """
         Compute the hamming distance for both possible binary values.
@@ -269,7 +280,7 @@ class BinaryHammingDistance(UtilityCriterion):
         return super()._expected_loss(release_all_probabilities, hamming_distances)
 
 class MeanSquaredError(UtilityCriterion):
-    
+
     def __call__(self, releases, likelihood_x):
         return self.expected_mean_squared_error(releases, likelihood_x)
 
@@ -284,7 +295,7 @@ class MeanSquaredError(UtilityCriterion):
         """
         if len(releases.size()) < 3:
             raise RuntimeError("Tensor must have at least three dimensions: [releases, no_samples, no_features], but has shape: {}".format(releases.size()))
-        
+
         summed_mse = torch.zeros(releases.size(1))
         for release in releases:
             mse = elementwise_mse(release, expected)
