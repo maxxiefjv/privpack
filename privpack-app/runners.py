@@ -63,10 +63,10 @@ class GaussianNetworkRunner(PGANRunner):
 
 class BinaryNetworkRunner(PGANRunner):
 
-    def __init__(self, lambd: int, delta: float):
+    def __init__(self, lambd: int, delta: float, gan_criterion=None):
         super().__init__(
             gan_network =  BinaryGAN(torch.device('cpu'), 
-                                     PGANCriterion().add_privacy_criterion(BinaryMutualInformation()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMutualInformation())
+                                     gan_criterion if gan_criterion else PGANCriterion().add_privacy_criterion(BinaryMutualInformation()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMutualInformation())
                                     ),
             metrics = [
                 PartialBivariateBinaryMutualInformation('E[MI_ZX]', 0),

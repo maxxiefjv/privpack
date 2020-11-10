@@ -63,7 +63,7 @@ def run_binary(args):
     if not args.validate:
          for d in delta:
             for l in lambd:
-                runner = BinaryNetworkRunner(l, d)
+                runner = BinaryNetworkRunner(l, d, gan_criterion=binary_criterion_switch[args.criterion](args.alpha))
                 result = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
                 results.setdefault(d, {}).setdefault(l, result)
 
@@ -74,6 +74,11 @@ def run_binary(args):
     print(json.dumps(results, sort_keys=True, indent=4))
     save_results(results, args)
 
+binary_criterion_switch = {
+    'mi': lambda lambd,delta,x: PGANCriterion().add_privacy_criterion(BinaryMutualInformation()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMutualInformation()),
+    'maxl': lambda lambd,delta,x: PGANCriterion().add_privacy_criterion(BinaryMaximalLeakage()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMaximalLeakage()),
+    'alpha': lambda lambd,delta,x: PGANCriterion().add_privacy_criterion(BinaryAlphaLeakage(x)).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryAlphaLeakage(x)),
+}
 
 network_arg_switcher = {
     'binary': run_binary,
@@ -127,6 +132,15 @@ ap.add_argument('-i', '--train-input', help="Specify the input to use in the tra
                                   type=str,
                                   default='uncorrelated')
 
+ap.add_argument('-c', '--criterion', help="(Finite variables assumed) Specify the criterion to use in the training procedure.",
+                                  type=str,
+                                  metavar=list(binary_criterion_switch.keys())
+                                  default='mi')
+
+ap.add_argument('-a', '--alpha', help="(Finite variables assumed) Specify the alpha in the criterion.",
+                                  type=float,
+                                  default=1)
+
 ap.add_argument('--output-as-suffix', help='Use the output argument as suffix to the default generated outputname',
                                         default=False, dest='suffix',
                                         action='store_true')
@@ -137,6 +151,7 @@ ap.add_argument('--validate', help='Validate this run with kfold validation.',
 
 def main():
     args = ap.parse_args()
+    args['alpha'] = max(1, args.alpha)
     network_arg_switcher[args.network](args)
 
 if __name__ == "__main__":
