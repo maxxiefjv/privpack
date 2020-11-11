@@ -69,7 +69,7 @@ def run_binary(args):
                 for a in args.alpha:
                     runner = BinaryNetworkRunner(l, d, gan_criterion=binary_criterion_switch[args.criterion](l, d, a))
                     result = runner.run(train_data, test_data, epochs, batch_size, verbose=True)
-                    results.setdefault(d, {}).setdefault(l, result)
+                    results.setdefault(a, {}).setdefault(d, {}).setdefault(l, result)
 
     else:
         runner = BinaryExperiment()
