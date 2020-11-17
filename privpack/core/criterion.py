@@ -196,6 +196,8 @@ class BinaryAlphaLeakage(PrivacyCriterion):
             return self.alpha_leakage(releases, likelihood_x)
 
     def alpha_loss(self, likelihood_x):
+        min_value = torch.zeros_like(likelihood_x) + 1e-25
+        likelihood_x = torch.max(likelihood_x, min_value)
         return (self.alpha / (self.alpha - 1)) * (1 - torch.pow(likelihood_x, ((self.alpha - 1) / self.alpha)))
 
     def alpha_leakage(self, release_probabilities, likelihood_x):
