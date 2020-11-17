@@ -237,7 +237,7 @@ class GenerativeAdversarialNetwork(abc.ABC):
                     self.privatizer.train(mode=False)
                     self._print_network_update(train_data, test_data, epoch, elapsed, adversary_loss.item(), privatizer_loss.item())
 
-    
+
         self.adversary.train(mode=False)
         self.privatizer.train(mode=False)
 
@@ -319,20 +319,12 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
             PartialBivariateBinaryMutualInformation('E[I(Y;Z)]', 1),
             ComputeDistortion('E[hamm(x,y)]', [1]).set_distortion_function(lambda x, y: hamming_distance(x, y).to(torch.float64))
         ], lr=lr)
+        self.clip_value = 1
 
         self.n_noise = 0  # Size of the noise vector
         self.inp_size = 4
 
-        self.adversary = self._Adversary(self).to(device)
-        self.privatizer = self._Privatizer(self).to(device)
-
-        self.adversary.apply(self._weights_init)
-        self.privatizer.apply(self._weights_init)
-
-        self.adversary_optimizer = optim.Adam(
-            self.adversary.parameters(), lr=self.lr)
-        self.privatizer_optimizer = optim.Adam(
-            self.privatizer.parameters(), lr=self.lr)
+        self.reset()
 
     def _weights_init(self, m):
         classname = m.__class__.__name__
@@ -361,9 +353,12 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary = self._Adversary(self).to(self.device)
         self.privatizer = self._Privatizer(self).to(self.device)
 
-        self.adversary_optimizer = optim.Adam(
+        self.adversary.apply(self._weights_init)
+        self.privatizer.apply(self._weights_init)
+
+        self.adversary_optimizer = optim.SGD(
             self.adversary.parameters(), lr=self.lr)
-        self.privatizer_optimizer = optim.Adam(
+        self.privatizer_optimizer = optim.SGD(
             self.privatizer.parameters(), lr=self.lr)
 
     def save(self):
@@ -411,12 +406,15 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         return the adversary loss computed by `adversary_criterion`
         """
-        released = self.privatizer(entry).detach()
+        released = self.privatizer(entry)
         x_likelihoods = self._get_likelihoods(x_batch)
 
         # Get sample mean
         adversary_loss = self._adversary_criterion(released, x_likelihoods, y_batch).mean()
         adversary_loss.backward()
+
+        torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
+        torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
 
         self.adversary_optimizer.step()
 
@@ -441,6 +439,8 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         # Get sample mean
         privatizer_loss = self._privatizer_criterion(released, x_likelihoods, y_batch).mean()
         privatizer_loss.backward()
+
+        torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
 
         self.privatizer_optimizer.step()
 
