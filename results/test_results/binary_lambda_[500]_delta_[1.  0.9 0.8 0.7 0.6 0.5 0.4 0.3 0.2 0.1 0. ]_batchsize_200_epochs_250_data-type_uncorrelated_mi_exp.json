@@ -1,0 +1,1632 @@
+{
+    "1": {
+        "1.0": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.007769290658776802
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.002076441035077514
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.489968123007688
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.006654391868798411
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.002448261568611481
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.495313085864267
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0008125904126949383
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.0006568603171801723
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.49690605662853926
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0007082219919483101
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.003018094312999934
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.48668916385451816
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 2.1821064104835474e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 1.751729516543657e-05
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5074990626171728
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00011792286958744753
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 8.619031068949544e-06
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5018754688672168
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.002861354392627408
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.000916939549141041
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4981244140844666
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0024935122434447225
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.0018249916375601214
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.494625906195334
+                        }
+                    }
+                }
+            }
+        },
+        "0.9": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00017791715131728085
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.007668749393910972
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4747796737296081
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0004308601000441465
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.013932355159269723
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.46981627296587924
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.003143213288429026
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.003173203818883037
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5287830489405588
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0007579866638470437
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.0037891579141478525
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5298087739032621
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.027308019147362264
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.017066623597720796
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.45388076490438695
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.020982107710931355
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.017907282162095427
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4512378094523631
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.01020971652903619
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.009302858936838269
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4858144958581846
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.007390318158274182
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.011876265078504334
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.48362095210716816
+                        }
+                    }
+                }
+            }
+        },
+        "0.8": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.019275975703108114
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12545416080615973
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.3435214700918807
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.023714292357200302
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.10949557053626134
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.3569553805774278
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.023797680336467952
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1140115248560894
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.6962310144384024
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0178793028137922
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12053401529648125
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.7015373078365205
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0014367268896989579
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.04424929112355318
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.40307461567304087
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0013119106163469313
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.04321207077567616
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4032258064516129
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.014836794309758341
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.09457165892860075
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.48094236673444135
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.014301835262446477
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.09108055220280625
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.48723949828852037
+                        }
+                    }
+                }
+            }
+        },
+        "0.7": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0005806650567431858
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.09641294775599733
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.6806675417213576
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.213996309968039e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.08958549326214481
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.6745406824146981
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.002267809445091227
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1396837810185112
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.34820926307894245
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0028649428288508687
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1371478151150521
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.34908136482939633
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.06871523730450951
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.06911501325728664
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.34926884139482567
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0675469120446179
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.05274408829887364
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.37021755438859716
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.02385457060211464
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.10173724734393172
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4593818820650419
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.02348799827885615
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.09315913222535685
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4646132005442305
+                        }
+                    }
+                }
+            }
+        },
+        "0.6": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.006097635155704224
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.2404211479684298
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.25407837989874366
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.004181607329483389
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.24068458737099208
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.25984251968503935
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.2562121408002174e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12069158149492738
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.32777048565535344
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.817952760791352e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.09310358184836956
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.34570678665166854
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 2.798298456123784e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.01125631539112916
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5626171728533933
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00042911664858687887
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.0118889371490618
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.5641410352588146
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.002046060087224488
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12412301495149544
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.3814886794691635
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0015388473102770194
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1152257021228078
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": false,
+                            "expected_out": 0.5,
+                            "actual_out": 0.38989678053184085
+                        }
+                    }
+                }
+            }
+        },
+        "0.5": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.014492218786248984
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.026889501847499553
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.40371273204575286
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.01596151040227528
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.032189437760140535
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.3944506936632921
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.010873094488564994
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.02320677823359498
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.41083817738608663
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.013271359705322512
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.028999789540859786
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.40044994375703036
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0007023497982135418
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.011310708730072144
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.43794525684289465
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0005146184310379168
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.005127069577807487
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4579894973743436
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.008689221024342506
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.020468996270388895
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.417498722091578
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00991582951287857
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.022105432292935937
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.4176300449315553
+                        }
+                    }
+                }
+            }
+        },
+        "0.3999999999999999": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.4600630897439027e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.03773163855487113
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.3862741421338834
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 2.0548210490893386e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.032770387819673605
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.39407574053243344
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.04583328941643758
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1921135795874897
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.24789049315582223
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.037480664495125576
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.20871485361246953
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.23772028496437944
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.04828882431058615
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.2521650622110453
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.21372328458942633
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.04190037395631341
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.246188145551693
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.21680420105026257
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.03139223811930705
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.16067009345113537
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.2826293066263773
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.026467195553976627
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.1625577956612787
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.28286674218235847
+                        }
+                    }
+                }
+            }
+        },
+        "0.29999999999999993": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0009108199279933404
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.17253718884480945
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.2604537783611476
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00172528586012273
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.15876300018512096
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.26959130108736407
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00011339511493279816
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12378859214100438
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.295893493343334
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.3484068648593664e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.12400512315518392
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.2958380202474691
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0008868424505855503
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5139990976634702
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.1291713535808024
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0006759715921440361
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5048899403650224
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.12490622655663916
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0006370191645038962
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.2701082928830947
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.22850620842842798
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0008182471736384533
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.26255268790177577
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.23011184929715744
+                        }
+                    }
+                }
+            }
+        },
+        "0.19999999999999996": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0018297045959779837
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3257500313566408
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.17757359834989686
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0027639539721896894
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3429266136922081
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.16985376827896512
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.9350968648597757e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.2954549182353251
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.19144946559159948
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.0025681686940606e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.30545343870749186
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.18672665916760406
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.6622806729952034e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3306062261076481
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.17510311211098611
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 4.7200175898349985e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3013225264697652
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.1886721680420105
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0006294208331909318
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3172703918998714
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.18137539201749414
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0009373855720855779
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.3165675262898217
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.1817508651628599
+                        }
+                    }
+                }
+            }
+        },
+        "0.09999999999999998": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.0006907629311600182
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5800892166136541
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.08513032064504031
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00023431831364125605
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.6062342347196445
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.07761529808773904
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.132369733829468e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5177314316359352
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.10425651603225201
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.228196281771645e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5404614585221074
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.09711286089238845
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.1182763657284099e-07
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5181321248410959
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.10404949381327334
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 5.933903231865453e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5246310829261289
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.10202550637659415
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 0.00023406615204496189
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5386509243635618
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.0978121101635219
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 8.417805989694597e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.5571089253892936
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.09225122178557388
+                        }
+                    }
+                }
+            }
+        },
+        "0.0": {
+            "500": {
+                "0": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 7.16218094700522e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.936241006088165
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.007500468779298706
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 2.183625810979386e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9523913791617025
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.005249343832020997
+                        }
+                    }
+                },
+                "1": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.9362089499493952e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9568435113806586
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.004687792987061692
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.024659169259509e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9529558340243696
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.005249343832020997
+                        }
+                    }
+                },
+                "2": {
+                    "train": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 9.08920096051851e-08
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9401049330282354
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.006936632920884889
+                        }
+                    },
+                    "test": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 9.933355817762788e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9443290289768567
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.006376594148537134
+                        }
+                    }
+                },
+                "averages": {
+                    "train_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 8.871720818701453e-06
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9443964834990197
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.006374964895748429
+                        }
+                    },
+                    "test_average": {
+                        "I(X;Z)": {
+                            "satisfies": false,
+                            "expected_out": 0,
+                            "actual_out": 1.0931424365605386e-05
+                        },
+                        "I(Y;Z)": {
+                            "satisfies": false,
+                            "expected_out": 1,
+                            "actual_out": 0.9498920807209763
+                        },
+                        "E[hamm(x,y)]": {
+                            "satisfies": true,
+                            "expected_out": 0.5,
+                            "actual_out": 0.005625093937526376
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
