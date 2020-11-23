@@ -356,9 +356,9 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary.apply(self._weights_init)
         self.privatizer.apply(self._weights_init)
 
-        self.adversary_optimizer = optim.SGD(
+        self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr)
-        self.privatizer_optimizer = optim.SGD(
+        self.privatizer_optimizer = optim.Adam(
             self.privatizer.parameters(), lr=self.lr)
 
     def save(self):
