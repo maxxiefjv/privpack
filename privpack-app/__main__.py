@@ -73,9 +73,9 @@ def run_binary(args):
 
     else:
         runner = BinaryExperiment()
-        results = runner.run(train_data, epochs, batch_size, lambd, delta, verbose=True)
+        results = runner.run(train_data, epochs, batch_size, lambd, delta, args.criterion, args.alpha, verbose=True)
 
-    print(json.dumps(results, sort_keys=True, indent=4))
+    print(json.dumps(results, indent=4))
     save_results(results, args)
 
 binary_criterion_switch = {
