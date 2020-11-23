@@ -115,7 +115,7 @@ ap.add_argument('-k', '--sample', help="Only valid for gaussian network.Define t
                 nargs='*',
                 metavar="NO. SAMPLES",
                 default=None)
- 
+
 ap.add_argument('-b', '--batchsize', help="Define the number of samples used per minibatch iteration.",
                 type=int,
                 default=200)
