@@ -167,7 +167,7 @@ class BinaryMaximalLeakage(PrivacyCriterion):
         return self.maximal_leakage(releases, likelihood_x)
 
     def maxL_loss(self, likelihood_x):
-        return 1 - likelihood_x
+        return likelihood_x - 1
 
     def maximal_leakage(self, release_probabilities, likelihood_x):
         release_all_probabilities = torch.cat((1 - release_probabilities, release_probabilities), dim=1)
