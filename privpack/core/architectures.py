@@ -20,6 +20,7 @@ import torch.optim as optim
 
 from torch.utils.data import DataLoader
 from torch.distributions.multivariate_normal import MultivariateNormal
+from torch.distributions.normal import Normal
 
 from privpack.utils import compute_released_data_metrics
 from privpack.utils import (
@@ -411,10 +412,12 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         # Get sample mean
         adversary_loss = self._adversary_criterion(released, x_likelihoods, y_batch).mean()
-        adversary_loss.backward()
 
         torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
         torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
+        
+        adversary_loss.backward()
+
 
         self.adversary_optimizer.step()
 
@@ -438,9 +441,11 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         # Get sample mean
         privatizer_loss = self._privatizer_criterion(released, x_likelihoods, y_batch).mean()
-        privatizer_loss.backward()
 
         torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
+
+        privatizer_loss.backward()
+
 
         self.privatizer_optimizer.step()
 
@@ -537,7 +542,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
     def __init__(self, device, privacy_size, public_size, release_size,
                  gauss_gan_criterion, observation_model='full', lr=1e-3, noise_size=5,
                  no_hidden_units_per_layer=20):
-        """
+        """Adam
         The behavior of the `GaussianPrivacyPreservingAdversarialNetwork` is mostly defined by the privatizer
         and adversary criterion provided on init. This defines how to learn the best Privacy-Utility Trade-off
         parameters for the privatizer and adversary network.
@@ -571,21 +576,10 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.release_size = release_size
         self.observation_model = observation_model
 
+        self.clip_value = 1
+
         self.device = device
-
-        self.adversary = self._Adversary(self).to(device)
-        self.privatizer = self._Privatizer(self).to(device)
-
-        self.adversary.apply(self._weights_init)
-        self.privatizer.apply(self._weights_init)
-
-        self.adversary_optimizer = optim.Adam(
-            self.adversary.parameters(), lr=self.lr)
-        self.privatizer_optimizer = optim.Adam(
-            self.privatizer.parameters(), lr=self.lr)
-
-        self.mus = torch.Tensor([])
-        self.covs = torch.Tensor([])
+        self.reset()
 
     def observation_models(self):
         return ['full', 'public']    
@@ -607,6 +601,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary.apply(self._weights_init)
         self.privatizer.apply(self._weights_init)
 
+        #TODO: Try SGD.
         self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr)
         self.privatizer_optimizer = optim.Adam(
@@ -631,15 +626,19 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         adv_mu = adversary_out[:int(self.adversary.get_output_size() / 2)]
         adv_cov = torch.square(adversary_out[int(self.adversary.get_output_size() / 2):])
 
-        try:
-            # print(adv_mu, adv_cov)
-            normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
-        except Exception:
-            print(adv_mu, adv_cov)
-            self.adversary = self._Adversary(self).to(self.device)
-            adv_cov = torch.square(torch.randn_like(adv_cov)) + adv_cov
-            adv_mu = torch.randn_like(adv_mu) + adv_mu
-            normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
+        print(adv_mu, adv_cov)
+        if adv_mu.dim() == 1:
+            normal = Normal(adv_mu, adv_cov)
+        else:
+            try:
+                # print(adv_mu, adv_cov)
+                normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
+            except Exception:
+                print(adv_mu, adv_cov)
+                self.adversary = self._Adversary(self).to(self.device)
+                adv_cov = torch.square(torch.randn_like(adv_cov)) + adv_cov
+                adv_mu = torch.randn_like(adv_mu) + adv_mu
+                normal = MultivariateNormal(adv_mu, torch.diag(adv_cov))
 
         self.mus = torch.cat((self.mus, adv_mu.detach()), dim=0) if len(self.mus) == 0 else adv_mu.detach()
         self.covs = torch.cat((self.covs, adv_cov.detach()), dim=0) if len(self.covs) == 0 else adv_cov.detach()
@@ -648,7 +647,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
     def _get_log_prob(self, adversary_out, xi):
         adv_multivariate_output = self._get_adversary_distribution(adversary_out)
-        return adv_multivariate_output.log_prob(xi.float())
+        res = adv_multivariate_output.log_prob(xi.float())
+        # print(xi.float(),res)
+        return res
 
     def _get_log_likelihoods(self, released, x_batch):
         adversary_out = self.adversary(released)
@@ -673,6 +674,10 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         # Sample mean loss
         adversary_loss = self._adversary_criterion(released_samples, x_log_likelihoods, y_batch).mean()
+
+        torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
+        
+        # adversary_loss.register_hook(lambda grad: print(grad))
         adversary_loss.backward()
 
         self.adversary_optimizer.step()
@@ -682,9 +687,15 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
     def _update_privatizer(self, entry, x_batch, y_batch):
         released_samples = self.sampled_data
         x_log_likelihoods = self._get_expected_log_likelihoods(released_samples, x_batch)
+        print('x_log: ', x_log_likelihoods)
 
         # Sample mean loss
         privatizer_loss = self._privatizer_criterion(released_samples, x_log_likelihoods, y_batch).mean()
+        
+        torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
+        torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
+
+        # privatizer_loss.register_hook(lambda grad: print(grad))
         privatizer_loss.backward()
 
         self.privatizer_optimizer.step()
