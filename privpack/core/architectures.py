@@ -370,9 +370,9 @@ class BinaryPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.privatizer.apply(self._weights_init)
 
         self.adversary_optimizer = optim.Adam(
-            self.adversary.parameters(), lr=self.lr)
+            self.adversary.parameters(), lr=self.lr, weight_decay=1)
         self.privatizer_optimizer = optim.Adam(
-            self.privatizer.parameters(), lr=self.lr)
+            self.privatizer.parameters(), lr=self.lr, weight_decay=1)
 
     def save(self):
         """
@@ -587,6 +587,7 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.observation_model = observation_model
 
         self.clip_value = 0.5
+        self.with_clipping = False
 
         self.device = device
         self.reset()
@@ -611,10 +612,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         self.adversary.apply(self._weights_init)
         self.privatizer.apply(self._weights_init)
 
-        #TODO: Try SGD.
-        self.adversary_optimizer = optim.SGD(
+        self.adversary_optimizer = optim.Adam(
             self.adversary.parameters(), lr=self.lr, weight_decay=1)
-        self.privatizer_optimizer = optim.SGD(
+        self.privatizer_optimizer = optim.Adam(
             self.privatizer.parameters(), lr=self.lr, weight_decay=1)
 
         self.mus = torch.Tensor([])
@@ -639,12 +639,10 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         # (mu, diag) = torch.split(adversary_out, 2, dim-1)
         diag = 1 + nn.functional.elu(diag)
 
-        # print(mu, diag)
-        if mu.dim() == 1:
+        if mu.size() == 1:
             normal = Normal(mu, diag)
         else:
             try:
-                # print(mu, diag)
                 normal = MultivariateNormal(mu, torch.diag(diag))
             except Exception:
                 # print(mu, diag)
@@ -693,7 +691,8 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
 
         adversary_loss.backward()
 
-        torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
+        if self.with_clipping:
+            torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
 
         self.adversary_optimizer.step()
 
@@ -710,8 +709,9 @@ class GaussianPrivacyPreservingAdversarialNetwork(GenerativeAdversarialNetwork):
         # privatizer_loss.register_hook(lambda grad: print(grad))
         privatizer_loss.backward()
 
-        torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
-        torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
+        if self.with_clipping:
+            torch.nn.utils.clip_grad_value_(self.privatizer.parameters(), self.clip_value)
+            torch.nn.utils.clip_grad_value_(self.adversary.parameters(), self.clip_value)
 
         self.privatizer_optimizer.step()
 

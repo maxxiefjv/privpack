@@ -46,7 +46,7 @@ def run_gaussian(privacy_size, public_size, noise_size, hidden_layers_width, rel
                     runner = GaussianNetworkRunner(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model, l, d, lr=lr)
                     result = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
                     results.setdefault(d, {}).setdefault(l, result)
-                    # save_results(results, args)
+                    save_results(results, args)
 
     else:
         runner = GaussianExperiment(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model)
