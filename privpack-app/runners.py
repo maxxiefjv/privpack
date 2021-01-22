@@ -45,10 +45,10 @@ class PGANRunner():
 
 class GaussianNetworkRunner(PGANRunner):
 
-    def __init__(self, privacy_size: int, public_size: int, noise_size: int, hidden_layers_width: int, release_size: int, observation_model: str, lambd: int, delta: float, lr: int = 1e-3):
+    def __init__(self, privacy_size: int, public_size: int, noise_size: int, hidden_layers_width: int, release_size: int, observation_model: str, lambd: int, delta: float, gan_criterion=None, lr: int = 1e-3):
         super().__init__(
             gan_network = GaussGAN(torch.device('cpu'), privacy_size, public_size, release_size, 
-                                PGANCriterion().add_privacy_criterion(GaussianMutualInformation()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMutualInformation()),
+                                gan_criterion if gan_criterion else PGANCriterion().add_privacy_criterion(GaussianMutualInformation()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMutualInformation()),
                                 observation_model=observation_model, no_hidden_units_per_layer=hidden_layers_width, noise_size=noise_size, lr=lr),
             metrics = [
                 PartialMultivariateGaussianMutualInformation('E[MI_XZ]', range(0, privacy_size)),

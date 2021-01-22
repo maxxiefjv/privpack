@@ -95,7 +95,7 @@ class PGANCriterion():
                 total_loss += criterion(releases, actual_public_values)
             else:
                 raise NotImplementedError("Unhandled Criterion type.")
-
+                    
         return total_loss
 
     def privacy_loss(self, releases, actual_private_values, actual_public_values):
@@ -227,6 +227,60 @@ class NegativeGaussianMutualInformation(GaussianMutualInformation):
     Compute the opposite direction of GaussianMutualInformation. 
     This is identical to -1 * log (Q(X|Z)) = log ( 1 / Q(X|Z) )
     """
+    def __call__(self, releases, actual_private_values):
+        return -1 * super().__call__(releases, actual_private_values)
+
+class GaussianMaximalLeakage(PrivacyCriterion):
+
+    def __call__(self, releases, likelihood_x):
+        return self.maximal_leakage(releases, likelihood_x)
+
+    def maxL_loss(self, log_likelihoods):
+        # likelihood_x is the log of the probability density function. For PDFs the value is not per se between 0-1. Transform to probability by getting the value for a small area
+        prob = torch.exp(log_likelihoods) * 1e-2
+        return prob - 1
+
+    def maximal_leakage(self, releases, log_likelihoods):
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())
+        return super()._expected_loss(probabilities, self.maxL_loss(log_likelihoods))
+
+class NegativeGaussianMaximalLeakage(GaussianMaximalLeakage):
+    def __call__(self, releases, actual_private_values):
+        return -1 * super().__call__(releases, actual_private_values)
+
+class GaussianAlphaLeakage(PrivacyCriterion):
+
+    def __init__(self, a):
+        if a < 1:
+            raise RuntimeError("Alpha should be bigger than 1, but was {}".format(a))
+        self.alpha = a
+
+    def __str__(self):
+        return type(self).__name__ + '(alpha={})'.format(self.alpha)
+
+    def __call__(self, releases, likelihood_x):
+        if self.alpha == 1:
+            return BinaryMutualInformation()(releases, likelihood_x)
+        elif self.alpha == np.Inf:
+            return BinaryMaximalLeakage()(releases, likelihood_x)
+        else:
+            return self.alpha_leakage(releases, likelihood_x)
+
+    def alpha_loss(self, likelihood_x):
+        min_value = torch.zeros_like(likelihood_x) + 1e-25
+        likelihood_x = torch.max(likelihood_x, min_value)
+
+        # likelihood_x is the log of the probability density function. For PDFs the value is not per se between 0-1. Transform to probability by getting the value for a small area
+        prob = torch.exp(likelihood_x) * 1e-2
+        return (self.alpha / (self.alpha - 1)) * (1 - torch.pow(prob, ((self.alpha - 1) / self.alpha)))
+
+    def alpha_leakage(self, releases, likelihood_x):
+        k = releases.size(0)
+        probabilities = torch.Tensor([1 / k]).repeat(log_likelihoods.size(0)).view(log_likelihoods.size())        
+        return super()._expected_loss(probabilities, self.alpha_loss(likelihood_x))
+
+class NegativeGaussianAlphaLeakage(GaussianAlphaLeakage):
     def __call__(self, releases, actual_private_values):
         return -1 * super().__call__(releases, actual_private_values)
 

@@ -11,6 +11,10 @@ from privpack.core.criterion import PGANCriterion
 from privpack.core.criterion import BinaryMutualInformation, BinaryHammingDistance, NegativeBinaryMutualInformation, BinaryMaximalLeakage, NegativeBinaryMaximalLeakage
 from privpack.core.criterion import BinaryAlphaLeakage, NegativeBinaryAlphaLeakage
 
+from privpack.core.criterion import GaussianAlphaLeakage, NegativeGaussianAlphaLeakage
+from privpack.core.criterion import GaussianMaximalLeakage, NegativeGaussianMaximalLeakage
+
+from privpack.core.criterion import NegativeGaussianMutualInformation, GaussianMutualInformation, MeanSquaredError
 
 import argparse
 import torch
@@ -43,10 +47,11 @@ def run_gaussian(privacy_size, public_size, noise_size, hidden_layers_width, rel
          for d in delta:
             for l in lambd:
                 for k in ks:
-                    runner = GaussianNetworkRunner(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model, l, d, lr=lr)
-                    result = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
-                    results.setdefault(d, {}).setdefault(l, result)
-                    save_results(results, args)
+                    for a in args.alpha:
+                        runner = GaussianNetworkRunner(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model, l, d, gan_criterion=gauss_criterion_switch[args.criterion](l, d, a), lr=lr)
+                        result = runner.run(train_data, test_data, epochs, batch_size, k, verbose=True)
+                        results.setdefault(a, {}).setdefault(d, {}).setdefault(l, result)
+                        save_results(results, args)
 
     else:
         runner = GaussianExperiment(privacy_size, public_size, noise_size, hidden_layers_width, release_size, observation_model)
@@ -82,6 +87,12 @@ binary_criterion_switch = {
     'mi': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(BinaryMutualInformation()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMutualInformation()),
     'maxl': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(BinaryMaximalLeakage()).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryMaximalLeakage()),
     'alpha': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(BinaryAlphaLeakage(x)).add_privacy_criterion(BinaryHammingDistance(lambd, delta)).add_adversary_criterion(NegativeBinaryAlphaLeakage(x)),
+}
+
+gauss_criterion_switch = {
+    'mi': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(GaussianMutualInformation()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMutualInformation()),
+    'maxl': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(GaussianMaximalLeakage()).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianMaximalLeakage()),
+    'alpha': lambda lambd, delta, x: PGANCriterion().add_privacy_criterion(GaussianAlphaLeakage(x)).add_privacy_criterion(MeanSquaredError(lambd, delta)).add_adversary_criterion(NegativeGaussianAlphaLeakage(x)),
 }
 
 network_arg_switcher = {
